@@ -1,0 +1,84 @@
+{
+  "hiveTracker": "http://localhost:4000",
+  "users": [
+    {
+      "firstName": "John",
+      "lastName": "Clifford",
+      "email": "jclifford@gmail.com",
+      "password": "Secret01?"
+    },
+    {
+      "firstName": "Admin",
+      "lastName": "Admin",
+      "email": "admin@admin.com",
+      "password": "Secret01?"
+    },
+    {
+      "firstName": "Homer",
+      "lastName": "Simpson",
+      "email": "homer@simpson.com",
+      "password": "Secret01?"
+    }
+  ],
+  "hives": [
+    {
+      "latitude": 52.0466642655387,
+      "longtitude": -9.55344039202828,
+      "hiveType": "Super",
+      "description": "Behind Back wall of main building",
+      "details": [
+        {
+          "comments": "Could be very exposed in winter"
+        }
+      ]
+    },
+    {
+      "latitude": 52.0536773653575,
+      "longtitude": -9.54854321484163,
+      "hiveType": "National",
+      "description": "Between two large rocks at top of island",
+      "details": [
+        {
+          "comments": "Room for at least 3 more hives"
+        }
+      ]
+    },
+    {
+      "latitude": 52.0795091357435,
+      "longtitude": -9.55908912421364,
+      "hiveType": "Super",
+      "description": "Behind back wall next to fenced gate",
+      "details": [
+        {
+          "comments": "A lot of kids in the area, might consider moving"
+        }
+      ]
+    },
+    {
+      "latitude": 52.0584178460594,
+      "longtitude": -9.633895933639,
+      "hiveType": "National",
+      "description": "Under the small bridge on North side ",
+      "details": [
+        {
+          "comments": "On a piece of high ground so should be safe from flooding"
+        }
+      ]
+    }
+  ],
+  "newHive": {
+    "latitude": 52.0584176560594,
+    "longtitude": -9.633895934329,
+    "hiveType": "National",
+    "description": "Under the small bridge on North side ",
+    "comments": "On a piece of high ground so should be safe from flooding"
+
+  },
+  "newUser": {
+    "firstName": "Homey",
+    "lastName": "Simpson",
+    "email": "homey@simpson.com",
+    "password": "Secret01?"
+  }
+}
+

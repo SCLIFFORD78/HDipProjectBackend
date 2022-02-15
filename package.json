@@ -1,0 +1,53 @@
+{
+  "name": "donation-web-2021",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "./node_modules/mocha/bin/mocha tests/**/*Test.js --reporter spec"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@googlemaps/js-api-loader": "^1.11.4",
+    "@hapi/bell": "^12.2.0",
+    "@hapi/boom": "^9.1.2",
+    "@hapi/cookie": "^11.0.2",
+    "@hapi/hapi": "^20.1.2",
+    "@hapi/inert": "^6.0.3",
+    "@hapi/joi": "^17.1.1",
+    "@hapi/vision": "^6.0.1",
+    "axios": "^0.21.1",
+    "bcrypt": "^5.0.1",
+    "bell": "^10.0.0",
+    "cloudinary": "^1.25.1",
+    "cors-anywhere": "^0.4.4",
+    "dotenv": "^8.6.0",
+    "express": "^4.17.1",
+    "express-openid-connect": "^2.3.1",
+    "handlebars": "^4.7.7",
+    "hapi-auth-jwt2": "^10.2.0",
+    "https": "^1.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "leaflet": "^1.7.1",
+    "lodash": "^4.17.21",
+    "mais-mongoose-seeder": "^1.0.7",
+    "mongodb": "^3.6.6",
+    "mongoose": "^5.12.10",
+    "mongoose-auto-increment": "^3.0.1",
+    "nodemailer": "^6.6.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "install": "^0.13.0",
+    "mocha": "^8.4.0",
+    "prettier": "^2.2.1"
+  },
+  "prettier": {
+    "printWidth": 120
+  },
+  "engines": {
+    "node": "^12.6.1"
+  }
+}

@@ -1,0 +1,104 @@
+{   "users": {
+        "_model": "User",
+        "john": {
+            "admin": false,
+            "firstName": "john",
+            "lastName": "clifford",
+            "email": "jclifford@gmail.com",
+            "password": "$2a$10$eVyc9pbqtQpozL4N45BqiuzE7RjJUDiWnqMIITzb3U8eBbR2VoEoa",
+            "memberNumber": 0,
+            "status": "Active"
+        },
+        "admin": {
+            "admin": true,
+            "firstName": "admin",
+            "lastName": "admin",
+            "email": "admin@admin.com",
+            "password": "$2a$10$eVyc9pbqtQpozL4N45BqiuzE7RjJUDiWnqMIITzb3U8eBbR2VoEoa",
+            "memberNumber": 1,
+            "status": "Active"
+        },
+        "homer": {
+            "admin": false,
+            "firstName": "homer",
+            "lastName": "Simpson",
+            "email": "homer@simpson.com",
+            "password": "Ranger01?",
+            "memberNumber": 2,
+            "status": "Active"
+        },
+        "marge": {
+            "admin": false,
+            "firstName": "Marge",
+            "lastName": "Simpson",
+            "email": "marge@simpson.com",
+            "password": "$2a$10$eVyc9pbqtQpozL4N45BqiuzE7RjJUDiWnqMIITzb3U8eBbR2VoEoa",
+            "memberNumber": 3,
+            "status": "Active"
+        }
+    },
+    "hives": {
+        "_model": "Hive",
+        "one": {
+            "latitude": 52.0466642655387,
+            "longtitude": -9.55344039202828,
+            "hiveType": "Super",
+            "description": "Behind Back wall of main building",
+            "owner": "->users.john",
+            "details": [
+                {
+                    "comments": "Could be very exposed in winter",
+                    "dateLogged": "2021-03-19T20:32:49.074Z"
+                }
+            ],
+            "added": "2021-03-19T20:32:49.075Z",
+            "hiveNumber": 0
+        },
+        "two": {
+            "latitude": 52.0536773653575,
+            "longtitude": -9.54854321484163,
+            "hiveType": "National",
+            "description": "Between two large rocks at top of island",
+            "owner": "->users.homer",
+            "details": [
+                {
+                    "comments": "Room for at least 3 more hives",
+                    "dateLogged": "2021-03-19T20:34:13.253Z"
+                }
+            ],
+            "added": "2021-03-19T20:34:13.253Z",
+            "hiveNumber": 1
+        },
+        "three": {
+            "latitude": 52.0795091357435,
+            "longtitude": -9.55908912421364,
+            "hiveType": "Super",
+            "description": "Behind back wall next to fenced gate",
+            "owner": "->users.john",
+            "details": [
+                {
+                    "comments": "A lot of kids in the area, might consider moving",
+                    "dateLogged": "2021-03-19T20:36:35.784Z"
+                }
+            ],
+            "added": "2021-03-19T20:36:35.784Z",
+            "hiveNumber": 2
+        },
+        "four": {
+            "latitude": 52.0584178460594,
+            "longtitude": -9.633895933639,
+            "hiveType": "National",
+            "description": "Under the small bridge on North side ",
+            "owner": "->users.homer",
+            "details": [
+                {
+                    "comments": "On a piece of high ground so should be safe from flooding",
+                    "dateLogged": "2021-03-19T20:38:38.652Z"
+                }
+            ],
+            "added": "2021-03-19T20:38:38.652Z",
+            "hiveNumber": 3
+        }
+    }
+    
+}

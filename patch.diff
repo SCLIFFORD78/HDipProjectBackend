@@ -1,0 +1,53 @@
+From b44b055afd279146984a635c95ab4c39b333ee89 Mon Sep 17 00:00:00 2001
+From: SCLIFFORD78 <faugh01@gmail.com>
+Date: Sat, 15 May 2021 13:25:56 +0100
+Subject: [PATCH] Unique numbering of hives and users added back in after
+ testing for assignment 2
+
+---
+ app/models/db.js   | 2 +-
+ app/models/hive.js | 2 +-
+ app/models/user.js | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/app/models/db.js b/app/models/db.js
+index 0d8b21f..de5ff93 100644
+--- a/app/models/db.js
++++ b/app/models/db.js
+@@ -18,7 +18,7 @@ function initDB(){
+   autoIncrement.initialize(db);
+ ;}
+ 
+-//initDB();
++initDB();
+ 
+ db.on("error", function (err) {
+   console.log(`database connection error: ${err}`);
+diff --git a/app/models/hive.js b/app/models/hive.js
+index 797ae3f..ed3bb33 100644
+--- a/app/models/hive.js
++++ b/app/models/hive.js
+@@ -17,7 +17,7 @@ const hiveSchema = new Schema({
+     ref: "User",
+   }
+ });
+-//hiveSchema.plugin(autoIncrement.plugin, {model: 'Hive', field:'hiveNumber'});
++hiveSchema.plugin(autoIncrement.plugin, {model: 'Hive', field:'hiveNumber'});
+ 
+ 
+ module.exports = Mongoose.model("Hive", hiveSchema);
+diff --git a/app/models/user.js b/app/models/user.js
+index 2aacc31..f820483 100644
+--- a/app/models/user.js
++++ b/app/models/user.js
+@@ -34,6 +34,6 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
+   }
+   return this;
+ };
+-//userSchema.plugin(autoIncrement.plugin, { model: "User", field: "memberNumber" });
++userSchema.plugin(autoIncrement.plugin, { model: "User", field: "memberNumber" });
+ 
+ module.exports = Mongoose.model("User", userSchema);
+-- 
+2.31.1.windows.1
+

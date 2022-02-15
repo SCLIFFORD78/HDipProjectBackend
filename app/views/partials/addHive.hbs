@@ -1,0 +1,45 @@
+<div class="uk-margin  uk-margin-auto uk-card uk-card-default uk-card-body uk-box-shadow-large">
+  <form class="uk-form-stacked uk-text-left" action="/addHive" method="POST">
+
+    <fieldset class="uk-fieldset">
+
+      <legend class="uk-legend">HIVE DETAILS</legend>
+      
+      <p>Click on the map to identify Latitude and Longtitude, then enter values in Form below.</p>
+
+      <div class="uk-width-1-2@s uk-margin">
+        <input class="uk-input" type="float" placeholder="Latitude" name="latitude" id="lat">
+      </div>
+      <div class="uk-width-1-2@s">
+        <input class="uk-input" type="float" placeholder="Longtitude" name="longtitude" id="lng">
+      </div>
+
+      <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid" id="hiveType">
+        <label><input class="uk-radio" type="radio" name="radio2"> Super</label>
+        <label><input class="uk-radio" type="radio" name="radio2"> National</label>
+      </div>
+
+      <div class="uk-margin">
+        <input class="textareauk-input uk-form-large" type="text" placeholder="Description" name="description">
+      </div>
+
+      <div class="uk-margin">
+        <textarea class="uk-textarea" rows="7" placeholder="Comments" name="comments"></textarea>
+      </div>
+
+      <div class="uk-margin">
+        <button class="submit uk-button uk-button-primary uk-button-large uk-width-1-1">Submit</button>
+      </div>
+
+    </fieldset>
+    
+
+   
+  </form>
+  
+
+
+
+
+
+</div>

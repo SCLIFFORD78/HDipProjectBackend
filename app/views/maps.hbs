@@ -1,0 +1,18 @@
+<div class="uk-flex uk-flex-center uk-flex-middle uk-grid-small" uk-grid>
+  {{> title-card title="Hive" subTitle="Hives recorded"}}
+  {{> main-menu }}
+</div>
+
+
+<div class="uk-container uk-margin">
+  {{> error }}
+  {{> map }}
+  <div class="uk-child-width-expand uk-flex-center uk-flex-middle uk-text-center" uk-grid>
+    <div class="uk-width-expand@m">
+      {{> hive-list}}
+    </div>
+    <div class="uk-width-auto@m">
+      <img width="300" src="images/hive.jpg">
+    </div>
+  </div>
+</div>
