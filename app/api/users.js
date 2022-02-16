@@ -8,6 +8,16 @@ const auth = require("../utils/auth.config");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const Joi = require("@hapi/joi");
+const admin = require("firebase-admin")
+const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-29b2f2e643.json");
+
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com"
+});
+
+
 
 const characters = "3PDQU5T2elyDBwtYlbc7kiRx5o2sLQyw";
 
@@ -92,13 +102,18 @@ const Users = {
         };
         const hash = await bcrypt.hash(request.payload.password, saltRounds);
         token = jwt.sign({ email: request.payload.email }, auth.secret);
-        const newUser = new User({
-          firstName: request.payload.firstName,
-          lastName: request.payload.lastName,
+
+        admin.auth().createUser({
           email: request.payload.email,
-          password: hash,
-          confirmationCode: token,
+          password: hash
+        }).then(function(userRecord) {
+          // See the UserRecord reference doc for the contents of userRecord.
+          console.log('Successfully created new user:', userRecord.uid);
+        }).catch(function(error) {
+          console.log('Error creating new user:', error);
         });
+        
+        
 
         // space here for email auth after
 
@@ -206,6 +221,7 @@ const Users = {
     },
     handler: async function (request, h) {
       try {
+        
         const user = await User.findOne({ email: request.payload.email });
         if (!user) {
           return Boom.unauthorized("User not found"); 

@@ -11,8 +11,10 @@ const Bell = require("@hapi/bell");
 const fs = require("fs");
 const https = require("https");
 const utils = require("./app/api/utils.js");
-
+const express = require("express");
 env.config();
+
+
 
 /* const server = Hapi.server({
   port: process.env.PORT || 443,
@@ -23,7 +25,7 @@ env.config();
 });
  */
 const server2 = Hapi.server({
-  port: process.env.PORT || 4000,
+  port: process.env.PORT || 4001,
   routes: { cors: true },
 });
 
@@ -46,6 +48,8 @@ async function init() {
     layout: true,
     isCached: false,
   });
+
+
 
 
 
