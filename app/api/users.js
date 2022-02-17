@@ -8,16 +8,32 @@ const auth = require("../utils/auth.config");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const Joi = require("@hapi/joi");
+const firebase = require("firebase/auth")
 const admin = require("firebase-admin")
+const initializeApp  = require("firebase/app")
+
 const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-29b2f2e643.json");
 
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCY8VnDgpIM0CGKRy6ZSnPnbR_V3X77jMQ",
+  authDomain: "hdip-65317.firebaseapp.com",
+  databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com",
+  projectId: "hdip-65317",
+  storageBucket: "hdip-65317.appspot.com",
+  messagingSenderId: "662261644857",
+  appId: "1:662261644857:web:c0baafb4920393093497e8",
+  measurementId: "G-L966EHJ23D"
+};
+const app = initializeApp.initializeApp (firebaseConfig)
+const fireAuth = firebase.getAuth(app)
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com"
 });
 
-
+var user = fireAuth.currentUser
 
 const characters = "3PDQU5T2elyDBwtYlbc7kiRx5o2sLQyw";
 
@@ -90,42 +106,38 @@ const Users = {
     },
     handler: async function (request, h) {
       try {
-        const email = request.payload.email;
-        let user = await User.findByEmail(email);
-        if (user) {
-          const message = "Email address is already registered";
-          throw Boom.badData(message);
-        };
         let token = "";
         for (let i = 0; i < characters.length; i++) {
           token += characters[Math.floor(Math.random() * characters.length)];
         };
         const hash = await bcrypt.hash(request.payload.password, saltRounds);
         token = jwt.sign({ email: request.payload.email }, auth.secret);
-
-        admin.auth().createUser({
+        await admin.auth().createUser({
           email: request.payload.email,
-          password: hash
+          password: request.payload.password,
+          displayName: request.payload.firstName + " " + request.payload.lastName
         }).then(function(userRecord) {
           // See the UserRecord reference doc for the contents of userRecord.
           console.log('Successfully created new user:', userRecord.uid);
+          
         }).catch(function(error) {
           console.log('Error creating new user:', error);
+          throw Boom.badData(error);
         });
-        
-        
+        const newUser = new User({
+          firstName: request.payload.firstName,
+          lastName: request.payload.lastName,
+          email: request.payload.email,
+          password: hash,
+          confirmationCode: token,
+        });
+        let user = newUser.save();
+        return h.response(newUser).code(201);
 
-        // space here for email auth after
-
-        user = await newUser.save();
       } catch (error) {
         console.log(error)
+        return Boom.badImplementation("error creating user");
       };
-      const test1 = await User.findByEmail(request.payload.email).lean();
-      if (test1) {
-        return h.response(test1).code(201);
-      }
-      return Boom.badImplementation("error creating user");
     },
   },
 
@@ -221,7 +233,20 @@ const Users = {
     },
     handler: async function (request, h) {
       try {
-        
+        var test = request.payload.password
+        console.log(test)
+        await firebase.signInWithEmailAndPassword(fireAuth,request.payload.email,request.payload.password).then((userCredential) => {
+          // Signed in
+          user = userCredential.user;
+          console.log('Successfully loggedin new user:',userCredential.user.displayName );
+          // ...
+        })
+        .catch((error) => {
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          console.log('Error loggedin new user:',errorMessage );
+        });
+          
         const user = await User.findOne({ email: request.payload.email });
         if (!user) {
           return Boom.unauthorized("User not found"); 
