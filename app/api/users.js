@@ -1,6 +1,6 @@
 "use strict";
 
-const User = require("../models/user");
+const User = require("../models/user").default;
 const Boom = require("@hapi/boom");
 const utils = require("./utils.js");
 const jwt = require("jsonwebtoken");
@@ -12,6 +12,8 @@ const firebase = require("firebase/auth")
 const admin = require("firebase-admin")
 const initializeApp  = require("firebase/app")
 const firebaseConfig = require("../utils/firebase.config")
+const fireDatabase = require("firebase/database")
+
 
 const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-29b2f2e643.json");
 
@@ -19,6 +21,7 @@ const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-
 
 const app = initializeApp.initializeApp (firebaseConfig)
 const fireAuth = firebase.getAuth(app)
+const database = fireDatabase.getDatabase(app)
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -111,20 +114,18 @@ const Users = {
         }).then(function(userRecord) {
           // See the UserRecord reference doc for the contents of userRecord.
           console.log('Successfully created new user:', userRecord.uid);
+          fireDatabase.set(fireDatabase.ref(database, 'users/' + userRecord.uid), {
+            username: userRecord.displayName,
+            email: userRecord.email,
+            dateJoined : Date()
+          });
+        
           
         }).catch(function(error) {
           console.log('Error creating new user:', error);
           throw Boom.badData(error);
         });
-        const newUser = new User({
-          firstName: request.payload.firstName,
-          lastName: request.payload.lastName,
-          email: request.payload.email,
-          password: hash,
-          confirmationCode: token,
-        });
-        let user = newUser.save();
-        return h.response(newUser).code(201);
+        return h.response(user).code(201);
 
       } catch (error) {
         console.log(error)
@@ -230,7 +231,7 @@ const Users = {
         await firebase.signInWithEmailAndPassword(fireAuth,request.payload.email,request.payload.password).then((userCredential) => {
           // Signed in
           user = userCredential.user;
-          console.log('Successfully loggedin new user:',userCredential.user.displayName );
+          console.log('Successfully loggedin new user:',userCredential.user.dateJoined );
           // ...
         })
         .catch((error) => {
@@ -239,7 +240,6 @@ const Users = {
           console.log('Error loggedin new user:',errorMessage );
         });
           
-        const user = await User.findOne({ email: request.payload.email });
         if (!user) {
           return Boom.unauthorized("User not found"); 
         } else if (!await user.comparePassword(request.payload.password) ){
