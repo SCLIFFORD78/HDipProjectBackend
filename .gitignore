@@ -3,3 +3,4 @@ node_modules
 .env
 keys
 config
+./app/utils/firebase.config.js

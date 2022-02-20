@@ -11,20 +11,12 @@ const Joi = require("@hapi/joi");
 const firebase = require("firebase/auth")
 const admin = require("firebase-admin")
 const initializeApp  = require("firebase/app")
+const firebaseConfig = require("../utils/firebase.config")
 
 const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-29b2f2e643.json");
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCY8VnDgpIM0CGKRy6ZSnPnbR_V3X77jMQ",
-  authDomain: "hdip-65317.firebaseapp.com",
-  databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com",
-  projectId: "hdip-65317",
-  storageBucket: "hdip-65317.appspot.com",
-  messagingSenderId: "662261644857",
-  appId: "1:662261644857:web:c0baafb4920393093497e8",
-  measurementId: "G-L966EHJ23D"
-};
+
 const app = initializeApp.initializeApp (firebaseConfig)
 const fireAuth = firebase.getAuth(app)
 
