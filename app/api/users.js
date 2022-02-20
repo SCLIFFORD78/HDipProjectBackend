@@ -8,11 +8,14 @@ const auth = require("../utils/auth.config");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const Joi = require("@hapi/joi");
-const firebase = require("firebase/auth")
+const db1 = require("../models/db1");
+const { isNull } = require("lodash");
+/* const firebase = require("firebase/auth")
 const admin = require("firebase-admin")
 const initializeApp  = require("firebase/app")
 const firebaseConfig = require("../utils/firebase.config")
 const fireDatabase = require("firebase/database")
+const db = require("../models/db1")
 
 
 const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-29b2f2e643.json");
@@ -26,9 +29,8 @@ const database = fireDatabase.getDatabase(app)
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com"
-});
+});*/
 
-var user = fireAuth.currentUser
 
 const characters = "3PDQU5T2elyDBwtYlbc7kiRx5o2sLQyw";
 
@@ -107,24 +109,8 @@ const Users = {
         };
         const hash = await bcrypt.hash(request.payload.password, saltRounds);
         token = jwt.sign({ email: request.payload.email }, auth.secret);
-        await admin.auth().createUser({
-          email: request.payload.email,
-          password: request.payload.password,
-          displayName: request.payload.firstName + " " + request.payload.lastName
-        }).then(function(userRecord) {
-          // See the UserRecord reference doc for the contents of userRecord.
-          console.log('Successfully created new user:', userRecord.uid);
-          fireDatabase.set(fireDatabase.ref(database, 'users/' + userRecord.uid), {
-            username: userRecord.displayName,
-            email: userRecord.email,
-            dateJoined : Date()
-          });
         
-          
-        }).catch(function(error) {
-          console.log('Error creating new user:', error);
-          throw Boom.badData(error);
-        });
+        var user = await db1.createNewUser(request.payload.email,request.payload.password,request.payload.firstName,request.payload.lastName)
         return h.response(user).code(201);
 
       } catch (error) {
@@ -228,27 +214,34 @@ const Users = {
       try {
         var test = request.payload.password
         console.log(test)
-        await firebase.signInWithEmailAndPassword(fireAuth,request.payload.email,request.payload.password).then((userCredential) => {
-          // Signed in
-          user = userCredential.user;
-          console.log('Successfully loggedin new user:',userCredential.user.dateJoined );
-          // ...
-        })
-        .catch((error) => {
-          var errorCode = error.code;
-          var errorMessage = error.message;
-          console.log('Error loggedin new user:',errorMessage );
-        });
+        let user
+        await db1.authenticate(request.payload.email, request.payload.password).then((usr) => {
+          if (!usr) {
+            return Boom.unauthorized("User not found"); 
+          }  else {
+            const token = utils.createToken(usr);
+            var retu =  h.response({ success: true, token: token }).code(201);
+            user = usr
+            return retu
+          }        
           
-        if (!user) {
-          return Boom.unauthorized("User not found"); 
-        } else if (!await user.comparePassword(request.payload.password) ){
-          return Boom.unauthorized("Wrong Password"); 
-        } else {
+        })
+        
+        if (typeof user !== 'undefined'){
           const token = utils.createToken(user);
-          return h.response({ success: true, token: token }).code(201);
+          console.log(user)
+          var retu =  h.response({ success: true, token: token }).code(201);
+          return retu
+        }else{
+          return Boom.unauthorized("User not found"); 
         }
+        
+        
+        
+        
+        
       } catch (err) {
+        console.log(err)
         return Boom.notFound("internal db failure");
       }
     },
