@@ -46,12 +46,27 @@ const Users = {
   },
 
   findOne: {
-    auth: {
-      strategy: "jwt",
-    },
+    auth: false,
     handler: async function (request, h) {
       try {
-        const user = await User.findOne({ _id: request.params.id });
+        //const user = await User.findOne({ _id: request.params.id });
+        const user = await db1.findOne({ userId: request.params.id });
+        if (!user) {
+          return Boom.notFound("No User with this id");
+        }
+        return user;
+      } catch (err) {
+        return Boom.notFound("No User with this id");
+      }
+    },
+  },
+
+  findOneTwo: {
+    auth: false,
+    async function (userId) {
+      try {
+        //const user = await User.findOne({ _id: request.params.id });
+        const user = await db1.findOne({ userId: userId });
         if (!user) {
           return Boom.notFound("No User with this id");
         }
@@ -68,10 +83,14 @@ const Users = {
     },
     handler: async function (request, h) {
       try {
-        const user = await User.findByEmail( request.params.email );
-        if (!user) {
-          return Boom.notFound("No User with this id");
-        }
+        var user = User
+        //const user = await User.findByEmail( request.params.email );
+        await db1.findByEmail( request.params.email ).then((returnUser)=>{
+          if (!returnUser) {
+            return Boom.notFound("No User with this id");
+          }
+          user = returnUser
+        })
         return user;
       } catch (err) {
         return Boom.notFound("No User with this id");
