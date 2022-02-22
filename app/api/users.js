@@ -48,13 +48,17 @@ const Users = {
   findOne: {
     auth: false,
     handler: async function (request, h) {
+      let returnStatment
       try {
         //const user = await User.findOne({ _id: request.params.id });
-        const user = await db1.findOne({ userId: request.params.id });
-        if (!user) {
-          return Boom.notFound("No User with this id");
-        }
-        return user;
+        await db1.findOne({ userId: request.params.id }).then((returnedUser)=>{
+          if (!returnedUser) {
+            returnStatment =  Boom.notFound("No User with this id");
+          }else{
+            returnStatment = returnedUser
+          }
+        });
+        return returnStatment
       } catch (err) {
         return Boom.notFound("No User with this id");
       }
@@ -155,11 +159,20 @@ const Users = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const user = await User.deleteOne({ _id: request.params.id });
-      if (user) {
-        return { success: true };
-      }
-      return Boom.notFound("id not found");
+      let returnStatment
+      await db1.deleteOne({ userId: request.params.id }).then((rslt)=>{
+        if (rslt) {
+          returnStatment = { success: true };
+        }else{
+          returnStatment =  Boom.notFound("id not found");
+        }
+        
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+      return returnStatment
+      
     },
   },
 
@@ -188,8 +201,9 @@ const Users = {
       },
     },
     handler: async function (request, h) {
+      let returnStatment
       const userEdit = request.payload;
-      const user = await User.findById(request.params.id);
+      const user = await db1.findById(request.params.id);
       let token = "";
       for (let i = 0; i < characters.length; i++) {
         token += characters[Math.floor(Math.random() * characters.length)];
@@ -200,11 +214,17 @@ const Users = {
       user.lastName = userEdit.lastName;
       user.email = userEdit.email;
       user.password = hash;
-      await user.save();
-      if (user) {
-        return { success: true };
-      }
-      return Boom.notFound("id not found");
+      await db1.updateUser(user).then((returnedUser)=>{
+        if (returnedUser) {
+          returnStatment = { success: true };
+        }else{
+          returnStatment = Boom.notFound("id not found");
+        }
+        
+      }).catch((error) => {
+        console.log(error)
+      })
+      return returnStatment
     },
   },
 

@@ -6,6 +6,7 @@ const User = {
   secondName:  "",
   image:  "",
   userName : "",
-  dateJoined:  Date().toString()
+  dateJoined:  Date().toString(),
+  admin: false
 }
 module.exports = User;
