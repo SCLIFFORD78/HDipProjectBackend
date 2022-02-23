@@ -7,6 +7,7 @@ const User = {
   image:  "",
   userName : "",
   dateJoined:  Date().toString(),
-  admin: false
+  admin: false,
+  email: ""
 }
 module.exports = User;

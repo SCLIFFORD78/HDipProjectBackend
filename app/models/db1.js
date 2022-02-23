@@ -57,11 +57,7 @@ const DB1 = {
   findByEmail: async function (email) {
     for (const [key, value] of Object.entries(users)) {
       if (value.email == email) {
-        console.log(value.email);
-        console.log(key);
-        returnUser = User;
-        returnUser.email = value.email;
-        returnUser.fbId = key;
+        returnUser = value;
         return returnUser;
       }
     }
@@ -96,18 +92,26 @@ const DB1 = {
       .then(function (userRecord) {
         // See the UserRecord reference doc for the contents of userRecord.
         console.log("Successfully created new user:", userRecord.uid);
+        var newUser = User
+        newUser.fbId = userRecord.uid;
+        newUser.firstName = firstName;
+        newUser.secondName = lastName;
+        newUser.email = userRecord.email;
+        newUser.userName = userRecord.displayName;
         fireDatabase.set(fireDatabase.ref(database, "users/" + userRecord.uid), {
-          username: userRecord.displayName,
-          email: userRecord.email,
-          dateJoined: Date(),
-        });
-        var user1 = User;
-        user1.fbId = userRecord.uid;
-        user1.firstName = firstName;
-        user1.lastName = lastName;
-        user1.email = userRecord.email;
+          email: newUser.email,
+          fbid: newUser.fbId,
+          firstName: newUser.firstName,
+          secondName: newUser.secondName,
+          dateJoined: newUser.dateJoined,
+          admin: newUser.admin,
+          image: newUser.image,
+          userName: newUser.userName
 
-        return user;
+        });
+        
+
+        return newUser;
       })
       .catch(function (error) {
         console.log("Error creating new user:", error);
