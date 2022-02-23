@@ -27,4 +27,15 @@ module.exports = [
   
 
   { method: "POST", path: "/api/users/authenticate", config: Users.authenticate },
+
+  {
+    method: "GET",
+    path: "/{param*}",
+    handler: {
+      directory: {
+        path: "./public",
+      },
+    },
+    options: { auth: false },
+  },
 ];

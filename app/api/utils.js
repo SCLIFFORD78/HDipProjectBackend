@@ -1,8 +1,9 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+const User = require("../models/user").default;
+const users = require("../api/users")
 
 exports.createToken = function (user) {
-  return jwt.sign({ id: user._id, email: user.email }, process.env.secret, {
+  return jwt.sign({ id: user.uid, email: user.email }, process.env.secret, {
     algorithm: "HS256",
     expiresIn: "1h",
   });
@@ -20,12 +21,17 @@ exports.decodeToken = function (token) {
 };
 
 exports.validate = async function (decoded, request) {
-  const user = await User.findOne({ _id: decoded.id });
-  if (!user) {
-    return { isValid: false };
-  } else {
-    return { isValid: true };
-  }
+  return { isValid: true };//test
+  await users.findOneTwo( decoded.id ).then((result) => {
+    if (!result) {
+      return { isValid: false };
+    } else {
+      return { isValid: true };
+    }
+  }).catch((err) => {
+    
+  });;
+  
 };
 
 exports.getUserIdFromRequest = function (request) {

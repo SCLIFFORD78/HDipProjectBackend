@@ -5,7 +5,7 @@ const Boom = require("@hapi/boom");
 const utils = require("./utils.js");
 const Weather = require("../utils/weather")
 const Cloudinary = require("../utils/cloudinary");
-const User = require("../models/user")
+const User = require("../models/user").default
 const Joi = require('@hapi/joi');
 
 
