@@ -21,18 +21,20 @@ const Hives = {
   },
 
   findOne: {
-    auth: {
-      strategy: "jwt",
-    },
+    auth: false,
     handler: async function (request, h) {
+      let returnStatment
       try {
-        const hive = await Hive.findOne({ _id: request.params.id });
-        if (!hive) {
-          return Boom.notFound("No hive with this id");
-        }
-        return hive;
+        await db1.findOneHive({ fbid: request.params.id }).then((returnedHive)=>{
+          if (!returnedHive) {
+            returnStatment =  Boom.notFound("No Hive with this id");
+          }else{
+            returnStatment = returnedHive
+          }
+        });
+        return returnStatment
       } catch (err) {
-        return Boom.notFound("No hive with this id");
+        return Boom.notFound("No Hive with this id");
       }
     },
   },
@@ -42,15 +44,19 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
+      let returnStatment
       try {
-        const owner = await User.findOne({_id:request.params.id});
-        const hives = await Hive.find({ owner: owner._id });
-        if (!hives) {
-          return Boom.notFound("No hive with this id");
-        }
-        return hives;
+        const user = await db1.findOne(request.params.id);
+        await db1.getHiveByOwner(user.fbid).then((returnedHives)=>{
+          if (!returnedHives) {
+            returnStatment =  Boom.notFound("No Hive with this id");
+          }else{
+            returnStatment = returnedHives
+          }
+        });
+        return returnStatment
       } catch (err) {
-        return Boom.notFound("No hive with this id");
+        return Boom.notFound("No Hive with this id");
       }
     },
   },
@@ -82,16 +88,23 @@ const Hives = {
       },
     },
     handler: async function (request, h) {
-      const hive = await Hive.create(request.payload);
-      try {
-        await Cloudinary.createUploadPreset(hive._id.toString());
-      } catch (err) {
-        console.log(err);
-      };
-      if (hive) {
-        return h.response(hive).code(201);
-      }
-      return Boom.badImplementation("error creating hive");
+      let returnStatment
+      await db1.createNewHive(request.payload).then((newHive)=>{
+        try {
+          await Cloudinary.createUploadPreset(newHive.fbid);
+        } catch (err) {
+          console.log(err);
+        };
+        if (newHive) {
+          returnStatment =  h.response(newHive).code(201);
+        }else{
+          returnStatment =  Boom.badImplementation("error creating hive");
+        }
+      }).catch((error)=>{
+        console.log(error)
+        returnStatment =  Boom.badImplementation("error creating hive");
+      });
+      return returnStatment
     },
   },
 

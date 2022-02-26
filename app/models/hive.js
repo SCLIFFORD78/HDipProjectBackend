@@ -1,4 +1,4 @@
-"use strict";
+/* "use strict";
 
 const Mongoose = require("mongoose");
 var autoIncrement = require('mongoose-auto-increment');
@@ -22,5 +22,21 @@ const hiveSchema = new Schema({
 hiveSchema.plugin(autoIncrement.plugin, {model: 'Hive', field:'hiveNumber'});
 
 
-module.exports = Mongoose.model("Hive", hiveSchema);
+module.exports = Mongoose.model("Hive", hiveSchema); */
+
+"use strict";
+
+const Hive = {
+  fbId:   "",
+  user: "",
+  tag:  0,
+  description:  "",
+  recordedData : "",
+  image : "",
+  dateRegistered:  Date().toString(),
+  sensorNumber: "",
+  location: {lat:0.0, lng:0.0, zoom:15},
+  details: [{comments: "", dateLogged: Date.toString()}]
+}
+module.exports = Hive;
 

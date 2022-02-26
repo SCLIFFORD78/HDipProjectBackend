@@ -4,6 +4,7 @@ const initializeApp = require("firebase/app");
 const firebaseConfig = require("../utils/firebase.config");
 const fireDatabase = require("firebase/database");
 const User = require("./user");
+const Hive = require("./hive");
 
 const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-29b2f2e643.json");
 const { authenticate } = require("../api/users");
@@ -22,6 +23,7 @@ admin.initializeApp({
   databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com",
 });
 var users = {};
+var hives = {};
 const DB1 = {
   findOne: async function (userId) {
     let returnStatment = null;
@@ -188,6 +190,53 @@ const DB1 = {
         // The write failed...
       });
   },
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////HIVES///////////////////////////////////////////////////////////////////
+
+  findOneHive: async function (fbid) {
+    let returnStatment = null;
+    for (const [key, value] of Object.entries(hives)) {
+      if (key == fbid) {
+        console.log(value);
+        console.log(key);
+        returnStatment = value;
+      }
+    }
+    return returnStatment;
+  },
+
+  getHiveByOwner: async function (userID) {
+    let returnStatment = [];
+    for (const [key, value] of Object.entries(hives)) {
+      if (key == userID) {
+        console.log(value);
+        console.log(key);
+        returnStatment.push(value)
+      }
+    }
+    return returnStatment;
+  },
+
+  createNewHive: async function (hive) {
+    var newHive = Hive
+    newHive.description = hive.description;
+    newHive.details = "";
+    newHive.image = "";
+    newHive.location.lat = hive.latitude;
+    newHive.location.lng = hive.longtitude;
+    //newHive.recordedData = hive.displayName;
+    newHive.sensorNumber = "84:71:27:69:43:45";
+    //newHive.tag = hive.displayName;
+    newHive.user = hive.owner;
+    var newRef = await fireDatabase.push(fireDatabase.ref(database,"hives/"),newHive)
+    await fireDatabase.set(fireDatabase.ref(database,"hives/" + newRef.key)),{
+      fbid: newRef.key
+    }
+    return newHive
+  }
 };
+
+
+
 
 module.exports = DB1;
