@@ -23,7 +23,7 @@ admin.initializeApp({
   databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com",
 });
 var users = {};
-var hives = {};
+var hives = [];
 const DB1 = {
   findOne: async function (userId) {
     let returnStatment = null;
@@ -45,7 +45,7 @@ const DB1 = {
       .get(fireDatabase.child(fireDatabase.ref(database), `users/`))
       .then((snapshot) => {
         if (snapshot.exists()) {
-          console.log(snapshot.val());
+          users = snapshot.exportVal();
           return snapshot;
         } else {
           console.log("No data available");
@@ -164,6 +164,7 @@ const DB1 = {
         .then(() => {
           // Data deleted successfully!
           returnStatment = true;
+          this.getUsers()
         })
         .catch((error) => {
           // The delete failed...
@@ -193,6 +194,26 @@ const DB1 = {
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////HIVES///////////////////////////////////////////////////////////////////
 
+  getHives: async function () {
+    let returnStatment
+    await fireDatabase
+      .get(fireDatabase.child(fireDatabase.ref(database), `hives/`))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          Object.keys(snapshot.exportVal()).forEach(key => {
+            hives.push(snapshot.exportVal()[key])
+          });
+          returnStatment = hives;
+        } else {
+          console.log("No data available");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+      return returnStatment
+  },
+
   findOneHive: async function (fbid) {
     let returnStatment = null;
     for (const [key, value] of Object.entries(hives)) {
@@ -220,19 +241,57 @@ const DB1 = {
   createNewHive: async function (hive) {
     var newHive = Hive
     newHive.description = hive.description;
-    newHive.details = "";
+    newHive.details.push({comments: hive.details.comments, dateLogged: Date.now().toString()});
     newHive.image = "";
     newHive.location.lat = hive.latitude;
     newHive.location.lng = hive.longtitude;
+    newHive.type = hive.hiveType;
     //newHive.recordedData = hive.displayName;
     newHive.sensorNumber = "84:71:27:69:43:45";
     //newHive.tag = hive.displayName;
-    newHive.user = hive.owner;
-    var newRef = await fireDatabase.push(fireDatabase.ref(database,"hives/"),newHive)
-    await fireDatabase.set(fireDatabase.ref(database,"hives/" + newRef.key)),{
-      fbid: newRef.key
-    }
+    newHive.user = ""//testing for now test hive.owner;
+    let newRef 
+    await fireDatabase.push(fireDatabase.ref(database,"hives/"),newHive).then((resp)=>{
+      newRef = resp.key
+      newHive.fbId = newRef
+      fireDatabase.update(fireDatabase.ref(database,"hives/" + newRef),{fbId: newRef})
+    })
+    this.getHives()
     return newHive
+  },
+
+  deleteHive: async function (fbid) {
+    let returnStatment = false;
+    var delHive = await this.findOneHive(fbid);
+    if (delHive) {
+      fireDatabase
+        .remove(fireDatabase.ref(database, "hives/" + fbid))
+        .then(() => {
+          // Data deleted successfully!
+          returnStatment = true;
+          this.getHives()
+        })
+        .catch((error) => {
+          // The delete failed...
+          returnStatment = false;
+        });
+    }
+    return returnStatment;
+  },
+
+  addComment: async function(fbid,comment){
+    let returnStatment = false;
+    fireDatabase.set( fireDatabase.push(fireDatabase.ref(database, "hives" + fbid / "details"))),{
+      comment: comment,
+      dateLogged: Date.toString()
+    }.then((id)=>{
+      if(id){
+        returnStatment = true
+      }else{
+        console.log("Comment not added")
+      }
+    })
+    return returnStatment
   }
 };
 

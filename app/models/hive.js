@@ -28,6 +28,7 @@ module.exports = Mongoose.model("Hive", hiveSchema); */
 
 const Hive = {
   fbId:   "",
+  type: "",
   user: "",
   tag:  0,
   description:  "",

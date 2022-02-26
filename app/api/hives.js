@@ -7,6 +7,7 @@ const Weather = require("../utils/weather")
 const Cloudinary = require("../utils/cloudinary");
 const User = require("../models/user").default
 const Joi = require('@hapi/joi');
+const db1 = require("../models/db1");
 
 
 const Hives = {
@@ -15,8 +16,22 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const hives = await Hive.find();
-      return hives;
+      let returnStatment
+      try {
+        await db1.getHives().then((hives)=>{
+          if(hives){
+            returnStatment = hives
+          }else{
+            returnStatment = Boom.notFound("No hives data found");
+          }
+          returnStatment = hives
+        });
+      } catch (error) {
+        console.log(error)
+        returnStatment = Boom.notFound("Error retriving hives data");
+      }
+      
+      return returnStatment;
     },
   },
 
@@ -89,14 +104,12 @@ const Hives = {
     },
     handler: async function (request, h) {
       let returnStatment
-      await db1.createNewHive(request.payload).then((newHive)=>{
-        try {
-          await Cloudinary.createUploadPreset(newHive.fbid);
-        } catch (err) {
-          console.log(err);
-        };
-        if (newHive) {
-          returnStatment =  h.response(newHive).code(201);
+      var newHive = Hive
+      await db1.createNewHive(request.payload).then((returnedHive)=>{
+        
+        if (returnedHive) {
+          returnStatment =  h.response(returnedHive).code(201);
+          newHive = returnedHive
         }else{
           returnStatment =  Boom.badImplementation("error creating hive");
         }
@@ -104,6 +117,14 @@ const Hives = {
         console.log(error)
         returnStatment =  Boom.badImplementation("error creating hive");
       });
+      try {
+        if(newHive.fbId != ""){
+          await Cloudinary.createUploadPreset(newHive.fbId);
+        }
+        
+      } catch (err) {
+        console.log(err);
+      };
       return returnStatment
     },
   },
