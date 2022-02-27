@@ -40,17 +40,18 @@ const Hives = {
     handler: async function (request, h) {
       let returnStatment
       try {
-        await db1.findOneHive({ fbid: request.params.id }).then((returnedHive)=>{
+        await db1.findOneHive(request.params.id ).then((returnedHive)=>{
           if (!returnedHive) {
             returnStatment =  Boom.notFound("No Hive with this id");
           }else{
             returnStatment = returnedHive
           }
         });
-        return returnStatment
+        
       } catch (err) {
-        return Boom.notFound("No Hive with this id");
+        returnStatment = Boom.notFound("No Hive with this id");
       }
+      return returnStatment
     },
   },
 

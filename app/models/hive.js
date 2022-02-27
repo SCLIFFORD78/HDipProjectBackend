@@ -37,7 +37,7 @@ const Hive = {
   dateRegistered:  Date().toString(),
   sensorNumber: "",
   location: {lat:0.0, lng:0.0, zoom:15},
-  details: [{comments: "", dateLogged: Date.toString()}]
+  details: []
 }
 module.exports = Hive;
 
