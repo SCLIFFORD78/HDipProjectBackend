@@ -202,11 +202,11 @@ const DB1 = {
           hives = [];
           comments = [];
           Object.keys(snapshot.exportVal()).forEach((key) => {
-            Object.keys(snapshot.exportVal()[key].details).forEach((comment)=>{
-              comments.push(snapshot.exportVal()[key].details[comment])
-            })
-            var test = snapshot.exportVal()[key]// = comments
-            test.details = comments
+            Object.keys(snapshot.exportVal()[key].details).forEach((comment) => {
+              comments.push(snapshot.exportVal()[key].details[comment]);
+            });
+            var test = snapshot.exportVal()[key]; // = comments
+            test.details = comments;
             hives.push(test);
           });
           returnStatment = hives;
@@ -237,6 +237,8 @@ const DB1 = {
         console.log(value);
         console.log(key);
         returnStatment.push(value);
+      } else {
+        console.log("No user found with id ", userID);
       }
     }
     return returnStatment;
@@ -263,7 +265,6 @@ const DB1 = {
       })
       .then((resp) => {
         fireDatabase.update(fireDatabase.ref(database, "hives/" + newRef), { fbId: newRef });
-        
       })
       .catch((error) => {
         console.log(error);
@@ -275,9 +276,12 @@ const DB1 = {
       })
       .then((resp) => {
         var newRefComment = resp.key;
-        fireDatabase.update(fireDatabase.ref(database, "hives/" + newRef + "/details/"+newRefComment), { fbId: newRefComment });
-      }).catch((error)=>{
-        console.log(error)
+        fireDatabase.update(fireDatabase.ref(database, "hives/" + newRef + "/details/" + newRefComment), {
+          fbId: newRefComment,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
       });
     this.getHives();
     return newHive;
@@ -304,16 +308,51 @@ const DB1 = {
 
   addComment: async function (fbid, comment) {
     let returnStatment = false;
-    fireDatabase.set(fireDatabase.push(fireDatabase.ref(database, "hives" + fbid / "details"))),
-      {
-        comment: comment,
-        dateLogged: Date.toString(),
-      }.then((id) => {
-        if (id) {
-          returnStatment = true;
+    await fireDatabase
+      .push(fireDatabase.ref(database, "hives/" + fbid + "/details/"), {
+        comments: comment,
+        dateLogged: Date().toString(),
+      })
+      .then((resp) => {
+        var newRefComment = resp.key;
+        fireDatabase.update(fireDatabase.ref(database, "hives/" + fbid + "/details/" + newRefComment), {
+          fbId: newRefComment,
+        });
+      })
+      .then(() => {
+        returnStatment = true;
+        this.getHives();
+      });
+    return returnStatment;
+  },
+
+  deleteComment: async function (hiveID, commentID) {
+    let returnStatment = false;
+    await fireDatabase
+      .remove(fireDatabase.ref(database, "hives/" + hiveID + "/details/" + commentID))
+      .then((resp) => {
+        returnStatment = true;
+        this.getHives();
+      })
+      .catch((error) => {
+        console.log("Error deleting comment ", commentID, " for hive: ", hiveID);
+      });
+    return returnStatment;
+  },
+
+  updateLocation: async function (hiveID, update) {
+    let returnStatment = { success: false };
+    await fireDatabase
+      .update(fireDatabase.ref(database, "hives/" + hiveID), { location: update })
+      .then((resp) => {
+        if (resp) {
+          returnStatment = { success: true };
         } else {
-          console.log("Comment not added");
+          console.log("Error updating location for :", hiveID, " with: ", update);
         }
+      })
+      .catch((error) => {
+        console.log(error);
       });
     return returnStatment;
   },
