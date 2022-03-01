@@ -23,7 +23,6 @@ const Hives = {
           } else {
             returnStatment = Boom.notFound("No hives data found");
           }
-          returnStatment = hives;
         });
       } catch (error) {
         console.log(error);

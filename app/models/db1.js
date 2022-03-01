@@ -202,9 +202,12 @@ const DB1 = {
           hives = [];
           comments = [];
           Object.keys(snapshot.exportVal()).forEach((key) => {
-            Object.keys(snapshot.exportVal()[key].details).forEach((comment) => {
-              comments.push(snapshot.exportVal()[key].details[comment]);
-            });
+            if (snapshot.exportVal()[key].details) {
+              Object.keys(snapshot.exportVal()[key].details).forEach((comment) => {
+                comments.push(snapshot.exportVal()[key].details[comment]);
+              });
+            }
+
             var test = snapshot.exportVal()[key]; // = comments
             test.details = comments;
             hives.push(test);
@@ -341,15 +344,11 @@ const DB1 = {
   },
 
   updateLocation: async function (hiveID, update) {
-    let returnStatment = { success: false };
+    let returnStatment = false;
     await fireDatabase
       .update(fireDatabase.ref(database, "hives/" + hiveID), { location: update })
       .then((resp) => {
-        if (resp) {
-          returnStatment = { success: true };
-        } else {
-          console.log("Error updating location for :", hiveID, " with: ", update);
-        }
+        returnStatment = true;
       })
       .catch((error) => {
         console.log(error);
