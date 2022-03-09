@@ -4,12 +4,14 @@ const initializeApp = require("firebase/app");
 const firebaseConfig = require("../utils/firebase.config");
 const fireDatabase = require("firebase/database");
 const User = require("./user");
+const Hive = require("./hive");
 
 const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-29b2f2e643.json");
 const { authenticate } = require("../api/users");
 const { func } = require("@hapi/joi");
 const { child } = require("firebase/database");
 const { map } = require("lodash");
+const { details } = require("./hive");
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
@@ -22,6 +24,7 @@ admin.initializeApp({
   databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com",
 });
 var users = {};
+var hives = [];
 const DB1 = {
   findOne: async function (userId) {
     let returnStatment = null;
@@ -43,7 +46,7 @@ const DB1 = {
       .get(fireDatabase.child(fireDatabase.ref(database), `users/`))
       .then((snapshot) => {
         if (snapshot.exists()) {
-          console.log(snapshot.val());
+          users = snapshot.exportVal();
           return snapshot;
         } else {
           console.log("No data available");
@@ -92,7 +95,7 @@ const DB1 = {
       .then(function (userRecord) {
         // See the UserRecord reference doc for the contents of userRecord.
         console.log("Successfully created new user:", userRecord.uid);
-        var newUser = User
+        var newUser = User;
         newUser.fbId = userRecord.uid;
         newUser.firstName = firstName;
         newUser.secondName = lastName;
@@ -106,10 +109,8 @@ const DB1 = {
           dateJoined: newUser.dateJoined,
           admin: newUser.admin,
           image: newUser.image,
-          userName: newUser.userName
-
+          userName: newUser.userName,
         });
-        
 
         return newUser;
       })
@@ -162,6 +163,7 @@ const DB1 = {
         .then(() => {
           // Data deleted successfully!
           returnStatment = true;
+          this.getUsers();
         })
         .catch((error) => {
           // The delete failed...
@@ -187,6 +189,172 @@ const DB1 = {
       .catch((error) => {
         // The write failed...
       });
+  },
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////HIVES///////////////////////////////////////////////////////////////////var test = snapshot.exportVal()[key].details
+
+  getHives: async function () {
+    let returnStatment;
+    await fireDatabase
+      .get(fireDatabase.child(fireDatabase.ref(database), `hives/`))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          hives = [];
+          comments = [];
+          Object.keys(snapshot.exportVal()).forEach((key) => {
+            comments = [];
+            if (snapshot.exportVal()[key].details) {
+              Object.keys(snapshot.exportVal()[key].details).forEach((comment) => {
+                comments.push(snapshot.exportVal()[key].details[comment]);
+              });
+            }
+
+            var test = snapshot.exportVal()[key]; // = comments
+            test.details = comments;
+            hives.push(test);
+          });
+          returnStatment = hives;
+        } else {
+          console.log("No data available");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    return returnStatment;
+  },
+
+  findOneHive: async function (fbid) {
+    let returnStatment = null;
+    hives.forEach((hive) => {
+      if (hive.fbId == fbid) {
+        returnStatment = hive;
+      }
+    });
+    return returnStatment;
+  },
+
+  getHiveByOwner: async function (userID) {
+    let returnStatment = [];
+    for (const [key, value] of Object.entries(hives)) {
+      if (value.user == userID) {
+        console.log(value);
+        console.log(key);
+        returnStatment.push(value);
+      } else {
+        console.log("No user found with id ", userID);
+      }
+    }
+    return returnStatment;
+  },
+
+  createNewHive: async function (hive) {
+    var newHive = Hive;
+    newHive.description = hive.description;
+    newHive.details = [];
+    newHive.image = "";
+    newHive.location.lat = hive.latitude;
+    newHive.location.lng = hive.longtitude;
+    newHive.type = hive.hiveType;
+    //newHive.recordedData = hive.displayName;
+    newHive.sensorNumber = "84:71:27:69:43:45";
+    //newHive.tag = hive.displayName;
+    newHive.user = user.uid; //testing for now test hive.owner;
+    let newRef;
+    await fireDatabase
+      .push(fireDatabase.ref(database, "hives/"), newHive)
+      .then((resp) => {
+        newRef = resp.key;
+        newHive.fbId = newRef;
+      })
+      .then((resp) => {
+        fireDatabase.update(fireDatabase.ref(database, "hives/" + newRef), { fbId: newRef });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    await fireDatabase
+      .push(fireDatabase.ref(database, "hives/" + newRef + "/details/"), {
+        comments: hive.details.comments,
+        dateLogged: Date().toString(),
+      })
+      .then((resp) => {
+        var newRefComment = resp.key;
+        fireDatabase.update(fireDatabase.ref(database, "hives/" + newRef + "/details/" + newRefComment), {
+          fbId: newRefComment,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    this.getHives();
+    return newHive;
+  },
+
+  deleteHive: async function (fbid) {
+    let returnStatment = false;
+    var delHive = await this.findOneHive(fbid);
+    if (delHive) {
+      await fireDatabase
+        .remove(fireDatabase.ref(database, "hives/" + fbid))
+        .then((resp) => {
+          // Data deleted successfully!
+          returnStatment = true;
+          this.getHives();
+        })
+        .catch((error) => {
+          // The delete failed...
+          returnStatment = false;
+        });
+    }
+    return returnStatment;
+  },
+
+  addComment: async function (fbid, comment) {
+    let returnStatment = false;
+    await fireDatabase
+      .push(fireDatabase.ref(database, "hives/" + fbid + "/details/"), {
+        comments: comment,
+        dateLogged: Date().toString(),
+      })
+      .then((resp) => {
+        var newRefComment = resp.key;
+        fireDatabase.update(fireDatabase.ref(database, "hives/" + fbid + "/details/" + newRefComment), {
+          fbId: newRefComment,
+        });
+      })
+      .then(() => {
+        returnStatment = true;
+        this.getHives();
+      });
+    return returnStatment;
+  },
+
+  deleteComment: async function (hiveID, commentID) {
+    let returnStatment = false;
+    await fireDatabase
+      .remove(fireDatabase.ref(database, "hives/" + hiveID + "/details/" + commentID))
+      .then((resp) => {
+        returnStatment = true;
+        this.getHives();
+      })
+      .catch((error) => {
+        console.log("Error deleting comment ", commentID, " for hive: ", hiveID);
+      });
+    return returnStatment;
+  },
+
+  updateLocation: async function (hiveID, update) {
+    let returnStatment = false;
+    await fireDatabase
+      .update(fireDatabase.ref(database, "hives/" + hiveID), { location: update })
+      .then((resp) => {
+        returnStatment = true;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    return returnStatment;
   },
 };
 

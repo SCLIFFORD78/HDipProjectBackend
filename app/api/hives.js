@@ -3,11 +3,11 @@
 const Hive = require("../models/hive");
 const Boom = require("@hapi/boom");
 const utils = require("./utils.js");
-const Weather = require("../utils/weather")
+const Weather = require("../utils/weather");
 const Cloudinary = require("../utils/cloudinary");
-const User = require("../models/user").default
-const Joi = require('@hapi/joi');
-
+const User = require("../models/user").default;
+const Joi = require("@hapi/joi");
+const db1 = require("../models/db1");
 
 const Hives = {
   find: {
@@ -15,25 +15,40 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const hives = await Hive.find();
-      return hives;
+      let returnStatment;
+      try {
+        await db1.getHives().then((hives) => {
+          if (hives) {
+            returnStatment = hives;
+          } else {
+            returnStatment = Boom.notFound("No hives data found");
+          }
+        });
+      } catch (error) {
+        console.log(error);
+        returnStatment = Boom.notFound("Error retriving hives data");
+      }
+
+      return returnStatment;
     },
   },
 
   findOne: {
-    auth: {
-      strategy: "jwt",
-    },
+    auth: false,
     handler: async function (request, h) {
+      let returnStatment;
       try {
-        const hive = await Hive.findOne({ _id: request.params.id });
-        if (!hive) {
-          return Boom.notFound("No hive with this id");
-        }
-        return hive;
+        await db1.findOneHive(request.params.id).then((returnedHive) => {
+          if (!returnedHive) {
+            returnStatment = Boom.notFound("No Hive with this id");
+          } else {
+            returnStatment = returnedHive;
+          }
+        });
       } catch (err) {
-        return Boom.notFound("No hive with this id");
+        returnStatment = Boom.notFound("No Hive with this id");
       }
+      return returnStatment;
     },
   },
 
@@ -42,15 +57,19 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
+      let returnStatment;
       try {
-        const owner = await User.findOne({_id:request.params.id});
-        const hives = await Hive.find({ owner: owner._id });
-        if (!hives) {
-          return Boom.notFound("No hive with this id");
-        }
-        return hives;
+        const user = await db1.findOne(request.params.id);
+        await db1.getHiveByOwner(user.fbId).then((returnedHives) => {
+          if (!returnedHives) {
+            returnStatment = Boom.notFound("No Hive with this id");
+          } else {
+            returnStatment = returnedHives;
+          }
+        });
+        return returnStatment;
       } catch (err) {
-        return Boom.notFound("No hive with this id");
+        return Boom.notFound("No Hive with this id");
       }
     },
   },
@@ -66,7 +85,7 @@ const Hives = {
         latitude: Joi.number().required(),
         longtitude: Joi.number().required().negative(),
         hiveType: Joi.any(),
-        owner: Joi.any()
+        owner: Joi.any(),
       },
       options: {
         abortEarly: false,
@@ -82,16 +101,30 @@ const Hives = {
       },
     },
     handler: async function (request, h) {
-      const hive = await Hive.create(request.payload);
+      let returnStatment;
+      var newHive = Hive;
+      await db1
+        .createNewHive(request.payload)
+        .then((returnedHive) => {
+          if (returnedHive) {
+            returnStatment = h.response(returnedHive).code(201);
+            newHive = returnedHive;
+          } else {
+            returnStatment = Boom.badImplementation("error creating hive");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          returnStatment = Boom.badImplementation("error creating hive");
+        });
       try {
-        await Cloudinary.createUploadPreset(hive._id.toString());
+        if (newHive.fbId != "") {
+          await Cloudinary.createUploadPreset(newHive.fbId);
+        }
       } catch (err) {
         console.log(err);
-      };
-      if (hive) {
-        return h.response(hive).code(201);
       }
-      return Boom.badImplementation("error creating hive");
+      return returnStatment;
     },
   },
 
@@ -100,7 +133,6 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-
       return { success: true };
     },
   },
@@ -110,8 +142,16 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const hive = await Hive.deleteOne({ _id: request.params.id });
-    
+      let returnStatment = false;
+      await db1.deleteHive(request.params.id).then((resp)=>{
+        if (resp){
+          returnStatment = true
+        }else{
+          returnStatment = Boom.notFound("id not found");
+        }
+      }).catch((error)=>{
+        console.log(error)
+      })
       try {
         await Cloudinary.deleteUploadPreset(request.params.id);
       } catch (error) {
@@ -127,42 +167,50 @@ const Hives = {
       } catch (error) {
         console.log(error);
       }
-      if (hive) {
-        return { success: true };
-      }
-      return Boom.notFound("id not found");
+      return returnStatment
     },
   },
- 
+
   addComment: {
     auth: {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const test = request;
-      const hive = await Hive.findById(request.payload._id);
-
-      await hive.details.push({ comments: request.payload.comment });
-      await hive.save();
-      if (hive) {
-        return { success: true };
-      }
-      return Boom.notFound("id not found");
+      let returnStatment = { success: false };
+      await db1
+        .addComment(request.payload._id, request.payload.comment)
+        .then((resp) => {
+          if (resp) {
+            returnStatment = { success: true };
+          } else {
+            console.log("Unable to add comment to hive ID (not found): ", request.payload._id);
+            returnStatment = Boom.notFound("id not found");
+          }
+        })
+        .catch((error) => {
+          console.log("Error adding comment: ", error);
+          returnStatment = Boom.notFound("Error trying to add comment: ", error);
+        });
+      return returnStatment;
     },
-  }, 
+  },
 
   deleteComment: {
     auth: {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const hive = await Hive.findById( request.params.id );
-      hive.details.pull({"_id": request.params.comment_id })
-      await hive.save();
-      if (hive) {
-        return { success: true };
-      }
-      return Boom.notFound("id not found");
+      let returnStatment = { success: false };
+      await db1.deleteComment(request.params.id, request.params.comment_id).then((resp)=>{
+        if (resp) {
+          returnStatment = { success: true };
+        } else {
+          returnStatment = Boom.notFound("Error deleting comment")
+        }
+      }).catch((error)=>{
+        console.log(error)
+      });
+      return returnStatment
     },
   },
 
@@ -171,15 +219,21 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const {id} = request.payload;
-      const {longtitude} = request.payload;
-      const {latitude} = request.payload;
-      const update = { longtitude: longtitude,latitude: latitude};
-      const hive = await Hive.findByIdAndUpdate(id,update,{ new: true }).lean();
-      if (hive) {
-        return { success: true };
-      }
-      return Boom.notFound("id not found");
+      let returnStatment = { success: false };
+      const { id } = request.payload;
+      const { longtitude } = request.payload;
+      const { latitude } = request.payload;
+      const update = { lng: longtitude, lat: latitude, zoom: 15 };
+      await db1.updateLocation(id, update).then((resp)=>{
+        if (resp) {
+          returnStatment = { success: true };
+        } else {
+          returnStatment = Boom.notFound("Error updating location, id not found");
+        }
+      }).catch((error)=>{
+        console.log(error)
+      })
+      return returnStatment
     },
   },
 
@@ -188,7 +242,7 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const weather = await Weather.fetchWeather( request.payload.latitude, request.payload.longtitude);
+      const weather = await Weather.fetchWeather(request.payload.latitude, request.payload.longtitude);
       if (weather) {
         return weather;
       }
@@ -222,8 +276,6 @@ const Hives = {
       return Boom.notFound("Error retrieving Images");
     },
   },
-  
-
 };
 
 module.exports = Hives;
