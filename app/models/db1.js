@@ -237,7 +237,7 @@ const DB1 = {
   getHiveByOwner: async function (userID) {
     let returnStatment = [];
     for (const [key, value] of Object.entries(hives)) {
-      if (key == userID) {
+      if (value.user == userID) {
         console.log(value);
         console.log(key);
         returnStatment.push(value);
@@ -259,7 +259,7 @@ const DB1 = {
     //newHive.recordedData = hive.displayName;
     newHive.sensorNumber = "84:71:27:69:43:45";
     //newHive.tag = hive.displayName;
-    newHive.user = ""; //testing for now test hive.owner;
+    newHive.user = user.uid; //testing for now test hive.owner;
     let newRef;
     await fireDatabase
       .push(fireDatabase.ref(database, "hives/"), newHive)
@@ -295,9 +295,9 @@ const DB1 = {
     let returnStatment = false;
     var delHive = await this.findOneHive(fbid);
     if (delHive) {
-      fireDatabase
+      await fireDatabase
         .remove(fireDatabase.ref(database, "hives/" + fbid))
-        .then(() => {
+        .then((resp) => {
           // Data deleted successfully!
           returnStatment = true;
           this.getHives();

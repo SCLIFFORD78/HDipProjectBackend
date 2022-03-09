@@ -60,7 +60,7 @@ const Hives = {
       let returnStatment;
       try {
         const user = await db1.findOne(request.params.id);
-        await db1.getHiveByOwner(user.fbid).then((returnedHives) => {
+        await db1.getHiveByOwner(user.fbId).then((returnedHives) => {
           if (!returnedHives) {
             returnStatment = Boom.notFound("No Hive with this id");
           } else {
@@ -142,8 +142,16 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const hive = await Hive.deleteOne({ _id: request.params.id });
-
+      let returnStatment = false;
+      await db1.deleteHive(request.params.id).then((resp)=>{
+        if (resp){
+          returnStatment = true
+        }else{
+          returnStatment = Boom.notFound("id not found");
+        }
+      }).catch((error)=>{
+        console.log(error)
+      })
       try {
         await Cloudinary.deleteUploadPreset(request.params.id);
       } catch (error) {
@@ -159,10 +167,7 @@ const Hives = {
       } catch (error) {
         console.log(error);
       }
-      if (hive) {
-        return { success: true };
-      }
-      return Boom.notFound("id not found");
+      return returnStatment
     },
   },
 
