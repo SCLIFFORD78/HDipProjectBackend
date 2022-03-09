@@ -202,6 +202,7 @@ const DB1 = {
           hives = [];
           comments = [];
           Object.keys(snapshot.exportVal()).forEach((key) => {
+            comments = [];
             if (snapshot.exportVal()[key].details) {
               Object.keys(snapshot.exportVal()[key].details).forEach((comment) => {
                 comments.push(snapshot.exportVal()[key].details[comment]);
