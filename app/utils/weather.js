@@ -17,6 +17,28 @@ const Weather = {
         }
         return weather;
     },
+
+    readWeatherHistory:async function (lat, lon, time) {
+        let weather = [];
+        var weatherRequest = `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${lat}&lon=${lon}&dt=${time}&appid=${weatherapiKey}`;
+        try {
+            var response = await axios.get(weatherRequest);
+            if (response.status == 200) {
+            weather.push(response.data['hourly'])
+            var ts = time;
+            for (let index = 0; index < 5; index++) {
+                var ts = ts - 86400 
+                weatherRequest = `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${lat}&lon=${lon}&dt=${ts}&appid=${weatherapiKey}`;
+                response = await axios.get(weatherRequest);
+                weather.push(response.data['hourly'])
+                
+            }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        return weather;
+    },
       
 
     fetchWeather: async function (lat, lon) {
