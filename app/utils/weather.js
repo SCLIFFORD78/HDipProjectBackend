@@ -1,64 +1,73 @@
-'use strict';
+"use strict";
 
 const axios = require("axios");
 const weatherapiKey = process.env.weatherapiKey;
 
 const Weather = {
-    readWeather:async function (lat, lon) {
-        let weather = null;
-        const weatherRequest = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherapiKey}`;
-        try {
-            const response = await axios.get(weatherRequest);
-            if (response.status == 200) {
-            weather = response.data
-            }
-        } catch (error) {
-            console.log(error);
-        }
-        return weather;
-    },
+  readWeather: async function (lat, lon) {
+    let weather = null;
+    const weatherRequest = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherapiKey}`;
+    try {
+      const response = await axios.get(weatherRequest);
+      if (response.status == 200) {
+        weather = response.data;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return weather;
+  },
 
-    readWeatherHistory:async function (lat, lon, time) {
-        let weather = [];
-        var weatherRequest = `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${lat}&lon=${lon}&dt=${time}&appid=${weatherapiKey}`;
-        try {
-            var response = await axios.get(weatherRequest);
-            if (response.status == 200) {
-            weather.push(response.data['hourly'])
-            var ts = time;
-            for (let index = 0; index < 5; index++) {
-                var ts = ts - 86400 
-                weatherRequest = `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${lat}&lon=${lon}&dt=${ts}&appid=${weatherapiKey}`;
-                response = await axios.get(weatherRequest);
-                weather.push(response.data['hourly'])
-                
-            }
-            }
-        } catch (error) {
-            console.log(error);
+  readWeatherHistory: async function (lat, lon, time) {
+    let weather = [];
+    let returnWeather = [];
+    var weatherRequest = `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${lat}&lon=${lon}&dt=${time}&appid=${weatherapiKey}`;
+    try {
+      var response = await axios.get(weatherRequest);
+      if (response.status == 200) {
+        weather.push(response.data["hourly"]);
+        var ts = time;
+        for (let index = 0; index < 5; index++) {
+          var ts = ts - 86400;
+          weatherRequest = `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${lat}&lon=${lon}&dt=${ts}&appid=${weatherapiKey}`;
+          response = await axios.get(weatherRequest);
+          if (response.status == 200) {
+            weather.push(response.data["hourly"]);
+          }
         }
-        return weather;
-    },
-      
+      }
+      if (weather.length > 0){
+        weather.forEach(element => {
+            element.forEach(reading => {
+                returnWeather.push({Temperature:Math.round(reading['temp'] - 273.15), Humidity:reading['humidity'], timeStamp:reading['dt']})
+            });
+            
+        });
+        storedWeatherHistory = returnWeather
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return returnWeather;
+  },
 
-    fetchWeather: async function (lat, lon) {
+  fetchWeather: async function (lat, lon) {
     let weather = await this.readWeather(lat, lon);
-    let report = '';
+    let report = "";
     if (weather != null) {
-        report = {
-        feelsLike : Math.round(weather.main.feels_like -273.15),
-        clouds : weather.weather[0].description,
+      report = {
+        feelsLike: Math.round(weather.main.feels_like - 273.15),
+        clouds: weather.weather[0].description,
         windSpeed: weather.wind.speed,
         windDirection: weather.wind.deg,
-        visibility: weather.visibility/1000,
-        humidity : weather.main.humidity
-        }
-
-        } else {
-        report = "Unknown Location";
+        visibility: weather.visibility / 1000,
+        humidity: weather.main.humidity,
+      };
+    } else {
+      report = "Unknown Location";
     }
     return report;
-    }
+  },
 };
 
 module.exports = Weather;
