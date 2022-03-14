@@ -38,17 +38,17 @@ const Weather = {
       }
       if (weather.length > 0){
         weather.forEach(element => {
+            element.reverse()
             element.forEach(reading => {
                 returnWeather.push({Temperature:Math.round(reading['temp'] - 273.15), Humidity:reading['humidity'], timeStamp:reading['dt']})
             });
             
         });
-        storedWeatherHistory = returnWeather
       }
     } catch (error) {
       console.log(error);
     }
-    return returnWeather;
+    return returnWeather.reverse();
   },
 
   fetchWeather: async function (lat, lon) {
