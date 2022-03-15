@@ -12,6 +12,7 @@ module.exports = [
   { method: "POST", path: "/api/hives/addComment", config: Hives.addComment },
   { method: "DELETE", path: "/api/hives/deleteComment/{id}/{comment_id}", config: Hives.deleteComment },
   { method: "POST", path: "/api/hives/getWeather", config: Hives.getWeather },
+  { method: "POST", path: "/api/hives/readWeatherHistory", config: Hives.readWeatherHistory },
   { method: "PUT", path: "/api/hives/updateLocation", config: Hives.updateLocation },
   { method: "GET", path: "/api/hives/gallery/{id}", config: Hives.gallery },
   { method: "DELETE", path: "/api/hives/deleteImage/{folder}/{id}", config: Hives.deleteImage },

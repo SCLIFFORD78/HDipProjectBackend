@@ -8,6 +8,7 @@ const Cloudinary = require("../utils/cloudinary");
 const User = require("../models/user").default;
 const Joi = require("@hapi/joi");
 const db1 = require("../models/db1");
+const { round } = require("lodash");
 
 const Hives = {
   find: {
@@ -244,6 +245,19 @@ const Hives = {
     handler: async function (request, h) {
       const weather = await Weather.fetchWeather(request.payload.latitude, request.payload.longtitude);
       if (weather) {
+        return weather;
+      }
+      return Boom.notFound("Error retrieving weather");
+    },
+  },
+
+  readWeatherHistory: {
+    auth: {
+      strategy: "jwt",
+    },
+    handler: async function (request, h) {
+      const weather = await Weather.readWeatherHistory(request.payload.latitude, request.payload.longtitude, round( (Date.now()/1000)));
+      if (weather.length>0) {
         return weather;
       }
       return Boom.notFound("Error retrieving weather");
