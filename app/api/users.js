@@ -51,7 +51,7 @@ const Users = {
       let returnStatment
       try {
         //const user = await User.findOne({ _id: request.params.id });
-        await db1.findOne({ userId: request.params.id }).then((returnedUser)=>{
+        await db1.findOne(request.params.id ).then((returnedUser)=>{
           if (!returnedUser) {
             returnStatment =  Boom.notFound("No User with this id");
           }else{

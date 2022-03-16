@@ -33,6 +33,11 @@ const DB1 = {
         console.log(value.email);
         console.log(key);
         returnUser = User;
+        returnUser.firstName = value.firstName
+        returnUser.secondName = value.secondName
+        returnUser.image = value.image
+        returnUser.userName = value.userName
+        returnUser.dateJoined = value.dateJoined
         returnUser.email = value.email;
         returnUser.fbId = key;
         returnStatment = returnUser;
@@ -250,6 +255,13 @@ const DB1 = {
 
   createNewHive: async function (hive) {
     var newHive = Hive;
+    hives.sort((a,b)=>a.tag - b.tag)
+    num = 1
+    hives.forEach(hive => {
+      if(hive.tag == num){
+        num++
+      }
+    });
     newHive.description = hive.description;
     newHive.details = [];
     newHive.image = "";
@@ -258,7 +270,7 @@ const DB1 = {
     newHive.type = hive.hiveType;
     //newHive.recordedData = hive.displayName;
     newHive.sensorNumber = "84:71:27:69:43:45";
-    //newHive.tag = hive.displayName;
+    newHive.tag = num;
     newHive.user = user.uid; //testing for now test hive.owner;
     let newRef;
     await fireDatabase
