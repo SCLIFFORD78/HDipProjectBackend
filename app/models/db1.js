@@ -60,6 +60,7 @@ const DB1 = {
       .catch((error) => {
         console.error(error);
       });
+      return users
   },
 
   findByEmail: async function (email) {
@@ -72,21 +73,12 @@ const DB1 = {
   },
 
   findById: async function (userId) {
-    let returnStatment = null;
-    fireDatabase
-      .get(fireDatabase.child(database, `users/${userId}`))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          console.log(snapshot.val());
-          returnStatment = snapshot.val();
-        } else {
-          console.log("No data available");
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-    return returnStatment;
+    for (const [key, value] of Object.entries(users)) {
+      if (value.fbid == userId) {
+        returnUser = value;
+        return returnUser;
+      }
+    }
   },
 
   createNewUser: async function (email, password, firstName, lastName) {
@@ -181,19 +173,24 @@ const DB1 = {
   updateUser: async function (user) {
     map.bind(user, User);
     fireDatabase
-      .set(fireDatabase.ref(database, "users/" + user.fbId), {
+      .set(fireDatabase.ref(database, "users/" + user.fbid), {
         firstName: user.firstName,
         secondName: user.secondName,
         image: user.image,
         userName: user.userName,
         admin: user.admin,
+        dateJoined: user.dateJoined,
+        email: user.email,
+        fbid: user.fbid
       })
       .then(() => {
+          return true
         // Data saved successfully!
       })
       .catch((error) => {
         // The write failed...
       });
+      return true
   },
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////HIVES///////////////////////////////////////////////////////////////////var test = snapshot.exportVal()[key].details

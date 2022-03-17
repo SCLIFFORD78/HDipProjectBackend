@@ -40,8 +40,24 @@ const Users = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const users = await User.find();
-      return users;
+      let returnStatment
+      try {
+        await db1.getUsers().then((resp)=>{
+          if(!resp){
+            returnStatment =  Boom.notFound("Users with this id");
+          }else{
+            returnStatment = []
+            for (const [key, value] of Object.entries(resp)) {
+              returnStatment.push(value)
+            }
+          }
+        })
+        //return returnStatment
+      } catch (error) {
+        console.log(error)
+        return Boom.badRequest("Error retriving users")
+      }
+      return returnStatment
     },
   },
 
@@ -294,15 +310,15 @@ const Users = {
       try {
         const { id } = request.params;
         const adminId = request.auth.credentials.id;
-        const user = await User.findById(adminId).lean();
-        const member = await User.findById(id).lean();
+        const user = await db1.findById(adminId);
+        const member = await db1.findById(id);
 
         if (member.admin) {
           member.admin = false;
         } else member.admin = true;
         const filter = { _id: id };
         const update = { admin: member.admin };
-        let adminRights = await User.findOneAndUpdate(filter, update, { new: true });
+        let adminRights = await db1.updateUser(member);
         return adminRights;
         console.log("Member " + member.email + " Has admin rights updated");
       } catch (err) {
