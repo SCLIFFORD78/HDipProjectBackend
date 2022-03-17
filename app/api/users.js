@@ -176,7 +176,7 @@ const Users = {
     },
     handler: async function (request, h) {
       let returnStatment
-      await db1.deleteOne({ userId: request.params.id }).then((rslt)=>{
+      await db1.deleteOne(request.params.id ).then((rslt)=>{
         if (rslt) {
           returnStatment = { success: true };
         }else{

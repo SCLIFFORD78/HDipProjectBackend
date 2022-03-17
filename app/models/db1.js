@@ -151,15 +151,23 @@ const DB1 = {
     return user;
   },
 
-  deleteUser: async function (userId) {
+  deleteOne: async function (userId) {
     let returnStatment = false;
-    var delUser = this.findOne(userId);
+    var delUser = await this.findOne(userId);
     if (delUser) {
-      fireDatabase
+      await fireDatabase
         .remove(fireDatabase.ref(database, "users/" + userId))
         .then(() => {
           // Data deleted successfully!
           returnStatment = true;
+          admin.auth().deleteUser(userId)
+          .then(() => {
+            console.log('Successfully deleted user');
+            returnStatment = true;
+          })
+          .catch((error) => {
+            console.log('Error deleting user:', error);
+          });
           this.getUsers();
         })
         .catch((error) => {
@@ -172,7 +180,7 @@ const DB1 = {
 
   updateUser: async function (user) {
     map.bind(user, User);
-    fireDatabase
+    await fireDatabase
       .set(fireDatabase.ref(database, "users/" + user.fbid), {
         firstName: user.firstName,
         secondName: user.secondName,
