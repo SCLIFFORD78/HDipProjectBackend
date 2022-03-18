@@ -25,6 +25,7 @@ module.exports = [
   { method: "PUT", path: "/api/users/{id}", config: Users.update },
   { method: "GET", path: "/api/users/findByEmail/{email}", config: Users.findByEmail },
   { method: "PUT", path: "/api/users/toggleAdmin/{id}", config: Users.toggleAdmin },
+  { method: "POST", path: "/api/users/logout", config: Users.logout },
   
 
   { method: "POST", path: "/api/users/authenticate", config: Users.authenticate },

@@ -229,8 +229,8 @@ const Users = {
       user.firstName = userEdit.firstName;
       user.lastName = userEdit.lastName;
       user.email = userEdit.email;
-      user.password = hash;
-      await db1.updateUser(user).then((returnedUser)=>{
+      //user.password = hash;
+      await db1.updateUser(user, userEdit.password).then((returnedUser)=>{
         if (returnedUser) {
           returnStatment = { success: true };
         }else{
@@ -267,8 +267,6 @@ const Users = {
     },
     handler: async function (request, h) {
       try {
-        var test = request.payload.password
-        console.log(test)
         let user
         await db1.authenticate(request.payload.email, request.payload.password).then((usr) => {
           if (!usr) {
@@ -324,6 +322,24 @@ const Users = {
       } catch (err) {
         return Boom.notFound("internal db failure");
       }
+    },
+  },
+
+  logout: {
+    auth: {
+      strategy: "jwt",
+    },
+    handler: async function (request, h) {
+      let returnStatment = false;
+      try {
+        await db1.logout().then((resp)=>{
+          if(resp)returnStatment = true
+          else returnStatment = false
+        })
+      } catch (err) {
+        return Boom.notFound("internal db failure");
+      }
+      return returnStatment
     },
   },
 };

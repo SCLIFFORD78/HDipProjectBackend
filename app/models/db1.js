@@ -33,11 +33,11 @@ const DB1 = {
         console.log(value.email);
         console.log(key);
         returnUser = User;
-        returnUser.firstName = value.firstName
-        returnUser.secondName = value.secondName
-        returnUser.image = value.image
-        returnUser.userName = value.userName
-        returnUser.dateJoined = value.dateJoined
+        returnUser.firstName = value.firstName;
+        returnUser.secondName = value.secondName;
+        returnUser.image = value.image;
+        returnUser.userName = value.userName;
+        returnUser.dateJoined = value.dateJoined;
         returnUser.email = value.email;
         returnUser.fbId = key;
         returnStatment = returnUser;
@@ -60,7 +60,7 @@ const DB1 = {
       .catch((error) => {
         console.error(error);
       });
-      return users
+    return users;
   },
 
   findByEmail: async function (email) {
@@ -151,6 +151,21 @@ const DB1 = {
     return user;
   },
 
+  logout: async function () {
+    let returnStatment = false;
+    await firebase.signOut(fireAuth).then(() => {
+      // Sign-out successful.
+      console.log("Signout successful")
+      returnStatment = true
+      user = ""
+    }).catch((error) => {
+      // An error happened.
+      console.log(error)
+    });
+    return returnStatment
+  },
+  
+
   deleteOne: async function (userId) {
     let returnStatment = false;
     var delUser = await this.findOne(userId);
@@ -160,14 +175,16 @@ const DB1 = {
         .then(() => {
           // Data deleted successfully!
           returnStatment = true;
-          admin.auth().deleteUser(userId)
-          .then(() => {
-            console.log('Successfully deleted user');
-            returnStatment = true;
-          })
-          .catch((error) => {
-            console.log('Error deleting user:', error);
-          });
+          admin
+            .auth()
+            .deleteUser(userId)
+            .then(() => {
+              console.log("Successfully deleted user");
+              returnStatment = true;
+            })
+            .catch((error) => {
+              console.log("Error deleting user:", error);
+            });
           this.getUsers();
         })
         .catch((error) => {
@@ -178,27 +195,46 @@ const DB1 = {
     return returnStatment;
   },
 
-  updateUser: async function (user) {
+  updateUser: async function (user,password) {
     map.bind(user, User);
     await fireDatabase
       .set(fireDatabase.ref(database, "users/" + user.fbid), {
         firstName: user.firstName,
         secondName: user.secondName,
         image: user.image,
-        userName: user.userName,
+        userName: user.firstName+" "+user.secondName,
         admin: user.admin,
         dateJoined: user.dateJoined,
         email: user.email,
-        fbid: user.fbid
+        fbid: user.fbid,
       })
       .then(() => {
-          return true
+        admin
+          .auth()
+          .updateUser(user.fbid, {
+            email: user.email,
+            //phoneNumber: "+11234567890",
+            //emailVerified: true,
+            password: password,
+            displayName: user.firstName+" "+user.secondName,
+            //photoURL: "http://www.example.com/12345678/photo.png",
+            //disabled: true,
+          })
+          .then((userRecord) => {
+            // See the UserRecord reference doc for the contents of userRecord.
+            console.log("Successfully updated user", userRecord.toJSON());
+          })
+          .catch((error) => {
+            console.log("Error updating user:", error);
+          });
+
+        return true;
         // Data saved successfully!
       })
       .catch((error) => {
         // The write failed...
       });
-      return true
+    return true;
   },
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////HIVES///////////////////////////////////////////////////////////////////var test = snapshot.exportVal()[key].details
@@ -260,11 +296,11 @@ const DB1 = {
 
   createNewHive: async function (hive) {
     var newHive = Hive;
-    hives.sort((a,b)=>a.tag - b.tag)
-    num = 1
-    hives.forEach(hive => {
-      if(hive.tag == num){
-        num++
+    hives.sort((a, b) => a.tag - b.tag);
+    num = 1;
+    hives.forEach((hive) => {
+      if (hive.tag == num) {
+        num++;
       }
     });
     newHive.description = hive.description;
