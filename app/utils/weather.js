@@ -18,31 +18,40 @@ const Weather = {
     return weather;
   },
 
-  readWeatherHistory: async function (lat, lon, time) {
+  readWeatherHistory: async function (lat, lon, dateLogged) {
     let weather = [];
     let returnWeather = [];
-    var weatherRequest = `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${lat}&lon=${lon}&dt=${time}&appid=${weatherapiKey}`;
+    var dateNow = Math.round((Date.now() / 1000)-((Date.now() / 1000)%3600));
+    var epocDate = new Date(dateLogged);
+    epocDate = epocDate.getTime() / 1000;
+
+    var weatherRequest = `http://history.openweathermap.org/data/2.5/history/city?lat=${lat}&lon=${lon}&type=hour&start=${epocDate}&end=${dateNow}&appid=${weatherapiKey}`;
     try {
       var response = await axios.get(weatherRequest);
       if (response.status == 200) {
-        weather.push(response.data["hourly"]);
-        var ts = time;
-        for (let index = 0; index < 5; index++) {
-          var ts = ts - 86400;
-          weatherRequest = `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${lat}&lon=${lon}&dt=${ts}&appid=${weatherapiKey}`;
-          response = await axios.get(weatherRequest);
-          if (response.status == 200) {
-            weather.push(response.data["hourly"]);
-          }
-        }
+        weather = response.data.list;
+        var ts = epocDate;
       }
-      if (weather.length > 0){
-        weather.forEach(element => {
-            element.reverse()
-            element.forEach(reading => {
-                returnWeather.push({Temperature:Math.round(reading['temp'] - 273.15), Humidity:reading['humidity'], timeStamp:reading['dt']})
-            });
-            
+      var lastDate = weather[(weather.length)-1]["dt"]
+      while(lastDate < dateNow-86400){
+        epocDate = weather[(weather.length)-1]["dt"]
+        weatherRequest = `http://history.openweathermap.org/data/2.5/history/city?lat=${lat}&lon=${lon}&type=hour&start=${epocDate}&end=${dateNow}&appid=${weatherapiKey}`;
+        response = await axios.get(weatherRequest);
+        if (response.status == 200) {
+          Array.prototype.push.apply(weather,response.data.list)
+          //weather.concat(response.data.list);
+          ts = epocDate;
+        }
+        lastDate = weather[(weather.length)-1]["dt"]
+      }
+      if (weather.length > 0) {
+        weather.forEach((element) => {
+          //element.reverse()
+          returnWeather.push({
+            Temperature: Math.round(element["main"]["temp"] - 273.15),
+            Humidity: element["main"]["humidity"],
+            timeStamp: element["dt"],
+          });
         });
       }
     } catch (error) {

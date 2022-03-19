@@ -256,7 +256,7 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const weather = await Weather.readWeatherHistory(request.payload.latitude, request.payload.longtitude, round( (Date.now()/1000)));
+      const weather = await Weather.readWeatherHistory(request.payload.latitude, request.payload.longtitude, request.payload.dateLogged);
       if (weather.length>0) {
         return weather;
       }
