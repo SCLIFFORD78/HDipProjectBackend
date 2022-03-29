@@ -144,15 +144,18 @@ const Hives = {
     },
     handler: async function (request, h) {
       let returnStatment = false;
-      await db1.deleteHive(request.params.id).then((resp)=>{
-        if (resp){
-          returnStatment = true
-        }else{
-          returnStatment = Boom.notFound("id not found");
-        }
-      }).catch((error)=>{
-        console.log(error)
-      })
+      await db1
+        .deleteHive(request.params.id)
+        .then((resp) => {
+          if (resp) {
+            returnStatment = true;
+          } else {
+            returnStatment = Boom.notFound("id not found");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
       try {
         await Cloudinary.deleteUploadPreset(request.params.id);
       } catch (error) {
@@ -168,7 +171,7 @@ const Hives = {
       } catch (error) {
         console.log(error);
       }
-      return returnStatment
+      return returnStatment;
     },
   },
 
@@ -202,16 +205,19 @@ const Hives = {
     },
     handler: async function (request, h) {
       let returnStatment = { success: false };
-      await db1.deleteComment(request.params.id, request.params.comment_id).then((resp)=>{
-        if (resp) {
-          returnStatment = { success: true };
-        } else {
-          returnStatment = Boom.notFound("Error deleting comment")
-        }
-      }).catch((error)=>{
-        console.log(error)
-      });
-      return returnStatment
+      await db1
+        .deleteComment(request.params.id, request.params.comment_id)
+        .then((resp) => {
+          if (resp) {
+            returnStatment = { success: true };
+          } else {
+            returnStatment = Boom.notFound("Error deleting comment");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      return returnStatment;
     },
   },
 
@@ -225,16 +231,19 @@ const Hives = {
       const { longtitude } = request.payload;
       const { latitude } = request.payload;
       const update = { lng: longtitude, lat: latitude, zoom: 15 };
-      await db1.updateLocation(id, update).then((resp)=>{
-        if (resp) {
-          returnStatment = { success: true };
-        } else {
-          returnStatment = Boom.notFound("Error updating location, id not found");
-        }
-      }).catch((error)=>{
-        console.log(error)
-      })
-      return returnStatment
+      await db1
+        .updateLocation(id, update)
+        .then((resp) => {
+          if (resp) {
+            returnStatment = { success: true };
+          } else {
+            returnStatment = Boom.notFound("Error updating location, id not found");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      return returnStatment;
     },
   },
 
@@ -256,9 +265,41 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const weather = await Weather.readWeatherHistory(request.payload.latitude, request.payload.longtitude, request.payload.dateLogged);
-      if (weather.length>0) {
-        return weather;
+      var combinedPointsTemperature = [];
+      var combinedPointsHumidity = [];
+      const hive = await db1.findOneHive(request.payload.fbid);
+      var values = JSON.parse("[" + hive.recordedData + "]");
+      values.forEach((element) => {
+        var theDate = new Date(element["timeStamp"] * 1000);
+        combinedPointsTemperature.push({
+          group: "Hive Temp",
+          date: theDate.toISOString(),
+          value: element["Temperature"],
+        });
+        combinedPointsHumidity.push({
+          group: "Hive Humidity",
+          date: theDate.toISOString(),
+          value: element["Humidity"],
+        });
+      });
+      const weather = await Weather.readWeatherHistory(hive.location.lat, hive.location.lng, hive.dateRegistered);
+      if (weather.length > 0) {
+        weather.forEach((element) => {
+          var theDate = new Date(element["timeStamp"] * 1000);
+          combinedPointsTemperature.push({
+            group: "Ambient Temp",
+            date: theDate.toISOString(),
+            value: element["Temperature"],
+          });
+          combinedPointsHumidity.push({
+            group: "Ambient Humidity",
+            date: theDate.toISOString(),
+            value: element["Humidity"],
+          });
+        });
+        return {combinedPointsTemperature:combinedPointsTemperature, combinedPointsHumidity:combinedPointsHumidity};
+      }else{
+        return {combinedPointsTemperature:combinedPointsTemperature, combinedPointsHumidity:combinedPointsHumidity};
       }
       return Boom.notFound("Error retrieving weather");
     },
