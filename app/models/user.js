@@ -1,7 +1,7 @@
 "use strict";
 
 const User = {
-  fbId:   "",
+  fbid:   "",
   firstName: "",
   secondName:  "",
   image:  "",
