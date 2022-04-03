@@ -22,8 +22,8 @@ const Weather = {
     let weather = [];
     let returnWeather = [];
     var dateNow = Math.round((Date.now() / 1000)-((Date.now() / 1000)%3600));
-    var epocDate = new Date(dateLogged);
-    epocDate = epocDate.getTime() / 1000;
+    var epocDate = dateLogged;
+    //epocDate = epocDate.getTime() / 1000;
 
     var weatherRequest = `http://history.openweathermap.org/data/2.5/history/city?lat=${lat}&lon=${lon}&type=hour&start=${epocDate}&end=${dateNow}&appid=${weatherapiKey}`;
     try {

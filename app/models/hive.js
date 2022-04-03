@@ -3,7 +3,7 @@
 "use strict";
 
 const Hive = {
-  fbId:   "",
+  fbid:   "",
   type: "",
   user: "",
   tag:  0,
