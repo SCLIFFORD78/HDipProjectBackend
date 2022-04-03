@@ -34,7 +34,7 @@ const Hive = {
   description:  "",
   recordedData : "",
   image : "",
-  dateRegistered:  Date().toString(),
+  dateRegistered:  Math.floor(Date.now() / 1000),
   sensorNumber: "",
   location: {lat:0.0, lng:0.0, zoom:15},
   details: []
