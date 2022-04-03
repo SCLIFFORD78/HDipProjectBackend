@@ -1,11 +1,10 @@
 const firebase = require("firebase/auth");
 const admin = require("firebase-admin");
 const initializeApp = require("firebase/app");
-const firebaseConfig = require("../utils/firebase.config");
+const firebaseConfig = require("../../config/firebase.config");
 const fireDatabase = require("firebase/database");
 const User = require("./user");
 const Hive = require("./hive");
-
 const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-29b2f2e643.json");
 const { authenticate } = require("../api/users");
 const { func } = require("@hapi/joi");
