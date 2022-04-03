@@ -61,7 +61,7 @@ const Hives = {
       let returnStatment;
       try {
         const user = await db1.findOne(request.params.id);
-        await db1.getHiveByOwner(user.fbId).then((returnedHives) => {
+        await db1.getHiveByOwner(user.fbid).then((returnedHives) => {
           if (!returnedHives) {
             returnStatment = Boom.notFound("No Hive with this id");
           } else {
@@ -119,8 +119,8 @@ const Hives = {
           returnStatment = Boom.badImplementation("error creating hive");
         });
       try {
-        if (newHive.fbId != "") {
-          await Cloudinary.createUploadPreset(newHive.fbId);
+        if (newHive.fbid != "") {
+          await Cloudinary.createUploadPreset(newHive.fbid);
         }
       } catch (err) {
         console.log(err);

@@ -38,7 +38,7 @@ const DB1 = {
         returnUser.userName = value.userName;
         returnUser.dateJoined = value.dateJoined;
         returnUser.email = value.email;
-        returnUser.fbId = key;
+        returnUser.fbid = key;
         returnStatment = returnUser;
       }
     }
@@ -92,14 +92,14 @@ const DB1 = {
         // See the UserRecord reference doc for the contents of userRecord.
         console.log("Successfully created new user:", userRecord.uid);
         var newUser = User;
-        newUser.fbId = userRecord.uid;
+        newUser.fbid = userRecord.uid;
         newUser.firstName = firstName;
         newUser.secondName = lastName;
         newUser.email = userRecord.email;
         newUser.userName = userRecord.displayName;
         fireDatabase.set(fireDatabase.ref(database, "users/" + userRecord.uid), {
           email: newUser.email,
-          fbid: newUser.fbId,
+          fbid: newUser.fbid,
           firstName: newUser.firstName,
           secondName: newUser.secondName,
           dateJoined: newUser.dateJoined,
@@ -272,7 +272,7 @@ const DB1 = {
   findOneHive: async function (fbid) {
     let returnStatment = null;
     hives.forEach((hive) => {
-      if (hive.fbId == fbid) {
+      if (hive.fbid == fbid) {
         returnStatment = hive;
       }
     });
@@ -317,10 +317,10 @@ const DB1 = {
       .push(fireDatabase.ref(database, "hives/"), newHive)
       .then((resp) => {
         newRef = resp.key;
-        newHive.fbId = newRef;
+        newHive.fbid = newRef;
       })
       .then((resp) => {
-        fireDatabase.update(fireDatabase.ref(database, "hives/" + newRef), { fbId: newRef });
+        fireDatabase.update(fireDatabase.ref(database, "hives/" + newRef), { fbid: newRef });
       })
       .catch((error) => {
         console.log(error);
@@ -333,7 +333,7 @@ const DB1 = {
       .then((resp) => {
         var newRefComment = resp.key;
         fireDatabase.update(fireDatabase.ref(database, "hives/" + newRef + "/details/" + newRefComment), {
-          fbId: newRefComment,
+          fbid: newRefComment,
         });
       })
       .catch((error) => {
@@ -372,7 +372,7 @@ const DB1 = {
       .then((resp) => {
         var newRefComment = resp.key;
         fireDatabase.update(fireDatabase.ref(database, "hives/" + fbid + "/details/" + newRefComment), {
-          fbId: newRefComment,
+          fbid: newRefComment,
         });
       })
       .then(() => {
