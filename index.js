@@ -5,7 +5,6 @@ const Inert = require("@hapi/inert");
 const Vision = require("@hapi/vision");
 const Handlebars = require("handlebars");
 const Cookie = require("@hapi/cookie");
-require("./app/models/db");
 const env = require("dotenv");
 const Bell = require("@hapi/bell");
 const fs = require("fs");
