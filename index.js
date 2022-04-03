@@ -30,7 +30,7 @@ const server2 = Hapi.server({
       origin: [
           'http://localhost:3000',
           'http://localhost',
-          'https://clever-sawine-64ada5.netlify.app'
+          'https://hdiphiveapp.netlify.app'
       ],
       additionalHeaders: [
           'Access-Control-Allow-Origin',
