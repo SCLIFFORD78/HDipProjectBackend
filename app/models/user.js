@@ -6,7 +6,7 @@ const User = {
   secondName:  "",
   image:  "",
   userName : "",
-  dateJoined:  Date().toString(),
+  dateJoined:  Math.floor(Date.now() / 1000).toString(),
   admin: false,
   email: ""
 }
