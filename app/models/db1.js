@@ -8,7 +8,7 @@ const Hive = require("./hive");
 const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-1d23de656e.json");
 const { authenticate } = require("../api/users");
 const { func } = require("@hapi/joi");
-const { child } = require("firebase/database");
+const { child, onValue } = require("firebase/database");
 const { map } = require("lodash");
 const { details } = require("./hive");
 
@@ -45,7 +45,7 @@ const DB1 = {
     return returnStatment;
   },
 
-  getUsers: async function () {
+/*   getUsers: async function () {
     fireDatabase
       .get(fireDatabase.child(fireDatabase.ref(database), `users/`))
       .then((snapshot) => {
@@ -59,6 +59,19 @@ const DB1 = {
       .catch((error) => {
         console.error(error);
       });
+    return users;
+  }, */
+
+  getUsers: async function () {
+    const fbUsers = fireDatabase.ref(database,"users");
+    onValue(fbUsers,(snapshot)=>{
+      if (snapshot.exists()) {
+        users = snapshot.val();
+        return snapshot;
+      } else {
+        console.log("No data available");
+      }
+    })
     return users;
   },
 
@@ -184,7 +197,7 @@ const DB1 = {
             .catch((error) => {
               console.log("Error deleting user:", error);
             });
-          this.getUsers();
+          //this.getUsers();
         })
         .catch((error) => {
           // The delete failed...
@@ -236,9 +249,11 @@ const DB1 = {
     return true;
   },
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////HIVES///////////////////////////////////////////////////////////////////
 
-  getHives: async function () {
+ /*  getHives: async function () {
     let returnStatment;
     await fireDatabase
       .get(fireDatabase.child(fireDatabase.ref(database), `hives/`))
@@ -266,6 +281,32 @@ const DB1 = {
       .catch((error) => {
         console.error(error);
       });
+    return returnStatment;
+  }, */
+  getHives: async function () {
+    const fbHives = fireDatabase.ref(database,"hives");
+    onValue(fbHives,(snapshot)=>{
+      if (snapshot.exists()) {
+        const data = snapshot.val()
+        hives = [];
+        comments = [];
+        Object.keys(data).forEach((key) => {
+          comments = [];
+          if (data[key].details) {
+            Object.keys(data[key].details).forEach((comment) => {
+              comments.push(data[key].details[comment]);
+            });
+          }
+
+          var test = data[key]; // = comments
+          test.details = comments;
+          hives.push(test);
+        });
+        returnStatment = hives;
+      } else {
+        console.log("No data available");
+      }
+    })
     return returnStatment;
   },
 
@@ -339,7 +380,7 @@ const DB1 = {
       .catch((error) => {
         console.log(error);
       });
-    this.getHives();
+    //this.getHives();
     return newHive;
   },
 
@@ -352,7 +393,7 @@ const DB1 = {
         .then((resp) => {
           // Data deleted successfully!
           returnStatment = true;
-          this.getHives();
+          //this.getHives();
         })
         .catch((error) => {
           // The delete failed...
@@ -377,7 +418,7 @@ const DB1 = {
       })
       .then(() => {
         returnStatment = true;
-        this.getHives();
+        //this.getHives();
       });
     return returnStatment;
   },
@@ -388,7 +429,7 @@ const DB1 = {
       .remove(fireDatabase.ref(database, "hives/" + hiveID + "/details/" + commentID))
       .then((resp) => {
         returnStatment = true;
-        this.getHives();
+        //this.getHives();
       })
       .catch((error) => {
         console.log("Error deleting comment ", commentID, " for hive: ", hiveID);
