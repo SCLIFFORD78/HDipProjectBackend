@@ -12,5 +12,5 @@ const Alarm = {
   recordedValue : 0,
   dateLogged:  Math.floor(Date.now() / 1000).toString()
 }
-module.exports = Hive;
+module.exports = Alarm;
 
