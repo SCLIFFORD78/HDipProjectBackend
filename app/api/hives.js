@@ -331,6 +331,30 @@ const Hives = {
       return Boom.notFound("Error retrieving Images");
     },
   },
+
+
+  getHiveAlarms: {
+    auth: {
+      strategy: "jwt",
+    },
+    handler: async function (request, h) {
+      let returnStatment;
+      try {
+        await db1.getHiveAlarms(request.params.id).then((alarms) => {
+          if (alarms) {
+            returnStatment = alarms;
+          } else {
+            returnStatment = Boom.notFound("No alarm data found");
+          }
+        });
+      } catch (error) {
+        console.log(error);
+        returnStatment = Boom.notFound("Error retriving hives data");
+      }
+
+      return returnStatment;
+    },
+  },
 };
 
 module.exports = Hives;
