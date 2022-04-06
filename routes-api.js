@@ -17,6 +17,8 @@ module.exports = [
   { method: "GET", path: "/api/hives/gallery/{id}", config: Hives.gallery },
   { method: "DELETE", path: "/api/hives/deleteImage/{folder}/{id}", config: Hives.deleteImage },
 
+  { method: "GET", path: "/api/hives/hive/alarms/{id}", config: Hives.getHiveAlarms },
+
   { method: "GET", path: "/api/users", config: Users.find },
   { method: "GET", path: "/api/users/{id}", config: Users.findOne },
   { method: "POST", path: "/api/users", config: Users.create },
