@@ -5,12 +5,14 @@ const firebaseConfig = require("../../config/firebase.config");
 const fireDatabase = require("firebase/database");
 const User = require("./user");
 const Hive = require("./hive");
+const Alarm = require("./alarms");
 const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-1d23de656e.json");
 const { authenticate } = require("../api/users");
 const { func } = require("@hapi/joi");
 const { child, onValue } = require("firebase/database");
 const { map } = require("lodash");
 const { details } = require("./hive");
+const { async } = require("@firebase/util");
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
@@ -23,7 +25,10 @@ admin.initializeApp({
   databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com",
 });
 var users = {};
+var alarms = [];
 var hives = [];
+this.fetchAlarms
+this.fetchHives
 const DB1 = {
   findOne: async function (userId) {
     let returnStatment = null;
@@ -45,7 +50,7 @@ const DB1 = {
     return returnStatment;
   },
 
-/*   getUsers: async function () {
+  /*   getUsers: async function () {
     fireDatabase
       .get(fireDatabase.child(fireDatabase.ref(database), `users/`))
       .then((snapshot) => {
@@ -62,17 +67,21 @@ const DB1 = {
     return users;
   }, */
 
-  getUsers: async function () {
-    const fbUsers = fireDatabase.ref(database,"users");
-    onValue(fbUsers,(snapshot)=>{
+  fetchUsers: async function () {
+    const fbUsers = fireDatabase.ref(database, "users");
+    onValue(fbUsers, (snapshot) => {
       if (snapshot.exists()) {
         users = snapshot.val();
         return snapshot;
       } else {
         console.log("No data available");
       }
-    })
+    });
     return users;
+  },
+
+  getAllUsers: async function () {
+    return users
   },
 
   findByEmail: async function (email) {
@@ -165,18 +174,20 @@ const DB1 = {
 
   logout: async function () {
     let returnStatment = false;
-    await firebase.signOut(fireAuth).then(() => {
-      // Sign-out successful.
-      console.log("Signout successful")
-      returnStatment = true
-      user = ""
-    }).catch((error) => {
-      // An error happened.
-      console.log(error)
-    });
-    return returnStatment
+    await firebase
+      .signOut(fireAuth)
+      .then(() => {
+        // Sign-out successful.
+        console.log("Signout successful");
+        returnStatment = true;
+        user = "";
+      })
+      .catch((error) => {
+        // An error happened.
+        console.log(error);
+      });
+    return returnStatment;
   },
-  
 
   deleteOne: async function (userId) {
     let returnStatment = false;
@@ -207,14 +218,14 @@ const DB1 = {
     return returnStatment;
   },
 
-  updateUser: async function (user,password) {
+  updateUser: async function (user, password) {
     map.bind(user, User);
     await fireDatabase
       .set(fireDatabase.ref(database, "users/" + user.fbid), {
         firstName: user.firstName,
         secondName: user.secondName,
         image: user.image,
-        userName: user.firstName+" "+user.secondName,
+        userName: user.firstName + " " + user.secondName,
         admin: user.admin,
         dateJoined: user.dateJoined,
         email: user.email,
@@ -228,7 +239,7 @@ const DB1 = {
             //phoneNumber: "+11234567890",
             //emailVerified: true,
             password: password,
-            displayName: user.firstName+" "+user.secondName,
+            displayName: user.firstName + " " + user.secondName,
             //photoURL: "http://www.example.com/12345678/photo.png",
             //disabled: true,
           })
@@ -249,11 +260,11 @@ const DB1 = {
     return true;
   },
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////HIVES///////////////////////////////////////////////////////////////////
 
- /*  getHives: async function () {
+  /*  getHives: async function () {
     let returnStatment;
     await fireDatabase
       .get(fireDatabase.child(fireDatabase.ref(database), `hives/`))
@@ -283,11 +294,12 @@ const DB1 = {
       });
     return returnStatment;
   }, */
-  getHives: async function () {
-    const fbHives = fireDatabase.ref(database,"hives");
-    onValue(fbHives,(snapshot)=>{
+  fetchHives: async function () {
+    let returnStatment;
+    const fbHives = fireDatabase.ref(database, "hives");
+    onValue(fbHives, (snapshot) => {
       if (snapshot.exists()) {
-        const data = snapshot.val()
+        const data = snapshot.val();
         hives = [];
         comments = [];
         Object.keys(data).forEach((key) => {
@@ -306,7 +318,15 @@ const DB1 = {
       } else {
         console.log("No data available");
       }
-    })
+    });
+    return returnStatment;
+  },
+
+  getAllHives: async function () {
+    let returnStatment = [];
+    for (const [key, value] of Object.entries(hives)) {
+      returnStatment.push(value);
+    }
     return returnStatment;
   },
 
@@ -324,8 +344,6 @@ const DB1 = {
     let returnStatment = [];
     for (const [key, value] of Object.entries(hives)) {
       if (value.user == userID) {
-        console.log(value);
-        console.log(key);
         returnStatment.push(value);
       } else {
         console.log("No user found with id ", userID);
@@ -449,6 +467,60 @@ const DB1 = {
       });
     return returnStatment;
   },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////ALARMS///////////////////////////////////////////////////////////////////
+  fetchAlarms: async function () {
+    const fbAlarms = fireDatabase.ref(database, "alarms");
+    onValue(fbAlarms, (snapshot) => {
+      if (snapshot.exists()) {
+        alarms = snapshot.val();
+        return snapshot;
+      } else {
+        console.log("No data available");
+      }
+    });
+    return alarms;
+  },
+
+  getHiveAlarms: async function (fbid) {
+    let returnStatment = [];
+    for (const [key, value] of Object.entries(alarms)) {
+      if (value.hiveid == fbid) {
+        returnStatment.push(value);
+      } else {
+        console.log("No alarm found with id ", fbid);
+      }
+    }
+    return returnStatment;
+  },
+
+  getAllAlarms: async function () {
+    let returnStatment = [];
+    for (const [key, value] of Object.entries(alarms)) {
+      returnStatment.push(value);
+    }
+    return returnStatment;
+  },
+
+  ackAlarm: async function (alarm) {
+    Alarm = alarm 
+    alarm.act = true
+    let returnStatment = false;
+    await fireDatabase
+      .update(fireDatabase.ref(database, "alarms/" + alarm.fbid), { alarm })
+      .then((resp) => {
+        returnStatment = true;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    return returnStatment;
+  },
+
+
 };
 
 module.exports = DB1;

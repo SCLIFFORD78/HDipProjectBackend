@@ -42,7 +42,7 @@ const Users = {
     handler: async function (request, h) {
       let returnStatment
       try {
-        await db1.getUsers().then((resp)=>{
+        await db1.getAllUsers().then((resp)=>{
           if(!resp){
             returnStatment =  Boom.notFound("Users with this id");
           }else{
