@@ -42,7 +42,7 @@ const Users = {
     handler: async function (request, h) {
       let returnStatment
       try {
-        await db1.getUsers().then((resp)=>{
+        await db1.getAllUsers().then((resp)=>{
           if(!resp){
             returnStatment =  Boom.notFound("Users with this id");
           }else{
@@ -275,6 +275,9 @@ const Users = {
             const token = utils.createToken(usr);
             var retu =  h.response({ success: true, token: token }).code(201);
             user = usr
+            db1.fetchAlarms()
+            db1.fetchHives()
+            db1.fetchUsers()
             return retu
           }        
           
