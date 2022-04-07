@@ -355,6 +355,29 @@ const Hives = {
       return returnStatment;
     },
   },
+
+  ackAlarm: {
+    auth: {
+      strategy: "jwt",
+    },
+    handler: async function (request, h) {
+      let returnStatment = { success: false };
+
+      await db1
+        .ackAlarm(request.payload.fbid)
+        .then((resp) => {
+          if (resp) {
+            returnStatment = { success: true };
+          } else {
+            returnStatment = Boom.notFound("Error acknowledging alarm");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      return returnStatment;
+    },
+  },
 };
 
 module.exports = Hives;
