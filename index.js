@@ -11,6 +11,7 @@ const fs = require("fs");
 const https = require("https");
 const utils = require("./app/api/utils.js");
 const express = require("express");
+const DB1 = require("./app/models/db1.js");
 env.config();
 
 
@@ -93,6 +94,9 @@ async function init() {
   await server2.start();
 
   console.log(`Server running at: ${server2.info.uri}`);
+  DB1.fetchHives()
+  DB1.fetchAlarms()
+  DB1.fetchUsers()
 }
 
 process.on("unhandledRejection", (err) => {
