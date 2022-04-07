@@ -27,8 +27,8 @@ admin.initializeApp({
 var users = {};
 var alarms = [];
 var hives = [];
-this.fetchAlarms
-this.fetchHives
+this.fetchAlarms;
+this.fetchHives;
 const DB1 = {
   findOne: async function (userId) {
     let returnStatment = null;
@@ -81,7 +81,7 @@ const DB1 = {
   },
 
   getAllUsers: async function () {
-    return users
+    return users;
   },
 
   findByEmail: async function (email) {
@@ -505,22 +505,24 @@ const DB1 = {
     return returnStatment;
   },
 
-  ackAlarm: async function (alarm) {
-    Alarm = alarm 
-    alarm.act = true
+  ackAlarm: async function (fbid) {
     let returnStatment = false;
-    await fireDatabase
-      .update(fireDatabase.ref(database, "alarms/" + alarm.fbid), { alarm })
-      .then((resp) => {
-        returnStatment = true;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    for (const [key, value] of Object.entries(alarms)) {
+      if (value.fbid == fbid) {
+        await fireDatabase
+          .update(fireDatabase.ref(database, "alarms/" + fbid), { act: true })
+          .then((resp) => {
+            returnStatment = true;
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      } else {
+        console.log("No alarm found with id ", fbid);
+      }
+    }
     return returnStatment;
   },
-
-
 };
 
 module.exports = DB1;
