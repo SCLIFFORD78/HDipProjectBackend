@@ -275,6 +275,9 @@ const Users = {
             const token = utils.createToken(usr);
             var retu =  h.response({ success: true, token: token }).code(201);
             user = usr
+            db1.fetchAlarms()
+            db1.fetchHives()
+            db1.fetchUsers()
             return retu
           }        
           
