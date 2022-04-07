@@ -18,7 +18,7 @@ const Hives = {
     handler: async function (request, h) {
       let returnStatment;
       try {
-        await db1.getHives().then((hives) => {
+        await db1.getAllHives().then((hives) => {
           if (hives) {
             returnStatment = hives;
           } else {
@@ -329,6 +329,53 @@ const Hives = {
         return "Image Deleted";
       }
       return Boom.notFound("Error retrieving Images");
+    },
+  },
+
+
+  getHiveAlarms: {
+    auth: {
+      strategy: "jwt",
+    },
+    handler: async function (request, h) {
+      let returnStatment;
+      try {
+        await db1.getHiveAlarms(request.params.id).then((alarms) => {
+          if (alarms) {
+            returnStatment = alarms;
+          } else {
+            returnStatment = Boom.notFound("No alarm data found");
+          }
+        });
+      } catch (error) {
+        console.log(error);
+        returnStatment = Boom.notFound("Error retriving hives data");
+      }
+
+      return returnStatment;
+    },
+  },
+
+  ackAlarm: {
+    auth: {
+      strategy: "jwt",
+    },
+    handler: async function (request, h) {
+      let returnStatment = { success: false };
+
+      await db1
+        .ackAlarm(request.payload.fbid)
+        .then((resp) => {
+          if (resp) {
+            returnStatment = { success: true };
+          } else {
+            returnStatment = Boom.notFound("Error acknowledging alarm");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      return returnStatment;
     },
   },
 };
