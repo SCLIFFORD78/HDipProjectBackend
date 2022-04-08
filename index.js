@@ -31,7 +31,8 @@ const server2 = Hapi.server({
       origin: [
           'http://localhost:3000',
           'http://localhost',
-          'https://hdiphiveapp.netlify.app'
+          'https://hdiphiveapp.netlify.app',
+          "http://res.cloudinary.com/digabwjfx/"
       ],
       additionalHeaders: [
           'Access-Control-Allow-Origin',
@@ -42,6 +43,7 @@ const server2 = Hapi.server({
           'access-control-request-method',
           'allow-origin',
           'origin',
+          'strict-origin-when-cross-origin'
       ]
   }
 

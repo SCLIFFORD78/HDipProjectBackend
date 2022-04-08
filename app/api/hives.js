@@ -118,13 +118,6 @@ const Hives = {
           console.log(error);
           returnStatment = Boom.badImplementation("error creating hive");
         });
-      try {
-        if (newHive.fbid != "") {
-          await Cloudinary.createUploadPreset(newHive.fbid);
-        }
-      } catch (err) {
-        console.log(err);
-      }
       return returnStatment;
     },
   },
@@ -156,21 +149,13 @@ const Hives = {
         .catch((error) => {
           console.log(error);
         });
-      try {
-        await Cloudinary.deleteUploadPreset(request.params.id);
-      } catch (error) {
-        console.log(error);
-      }
+
       try {
         await Cloudinary.deleteResourcesByPrefix(request.params.id);
       } catch (error) {
         console.log(error);
       }
-      try {
-        await Cloudinary.deleteFolder(request.params.id);
-      } catch (error) {
-        console.log(error);
-      }
+
       return returnStatment;
     },
   },
@@ -323,7 +308,7 @@ const Hives = {
       strategy: "jwt",
     },
     handler: async function (request, h) {
-      const imgID = request.params.folder + "/" + request.params.id;
+      const imgID = request.params.id;
       const success = await Cloudinary.deleteImage(imgID);
       if (success) {
         return "Image Deleted";
