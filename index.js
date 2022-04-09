@@ -99,6 +99,7 @@ async function init() {
   DB1.fetchHives()
   DB1.fetchAlarms()
   DB1.fetchUsers()
+  DB1.fetchComments()
 }
 
 process.on("unhandledRejection", (err) => {

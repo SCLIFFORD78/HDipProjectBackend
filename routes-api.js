@@ -9,8 +9,6 @@ module.exports = [
   { method: "POST", path: "/api/hives", config: Hives.create },
   { method: "DELETE", path: "/api/hives/{id}", config: Hives.deleteOne },
   { method: "DELETE", path: "/api/hives", config: Hives.deleteAll },
-  { method: "POST", path: "/api/hives/addComment", config: Hives.addComment },
-  { method: "DELETE", path: "/api/hives/deleteComment/{id}/{comment_id}", config: Hives.deleteComment },
   { method: "POST", path: "/api/hives/getWeather", config: Hives.getWeather },
   { method: "POST", path: "/api/hives/readWeatherHistory", config: Hives.readWeatherHistory },
   { method: "PUT", path: "/api/hives/updateLocation", config: Hives.updateLocation },
@@ -19,6 +17,10 @@ module.exports = [
 
   { method: "GET", path: "/api/hives/hive/alarms/{id}", config: Hives.getHiveAlarms },
   { method: "POST", path: "/api/hives/hive/ackalarm", config: Hives.ackAlarm },
+
+  { method: "POST", path: "/api/hives/addComment", config: Hives.addComment },
+  { method: "DELETE", path: "/api/hives/deleteComment/{comment_id}", config: Hives.deleteComment },
+  { method: "GET", path: "/api/hives/hive/comments/{id}", config: Hives.getHiveComments },
 
   { method: "GET", path: "/api/users", config: Users.find },
   { method: "GET", path: "/api/users/{id}", config: Users.findOne },

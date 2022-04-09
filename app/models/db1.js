@@ -6,6 +6,7 @@ const fireDatabase = require("firebase/database");
 const User = require("./user");
 const Hive = require("./hive");
 const Alarm = require("./alarms");
+const Comment = require("./comments");
 const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-1d23de656e.json");
 const { authenticate } = require("../api/users");
 const { func } = require("@hapi/joi");
@@ -27,6 +28,7 @@ admin.initializeApp({
 var users = {};
 var alarms = [];
 var hives = [];
+var comments = [];
 this.fetchAlarms;
 this.fetchHives;
 const DB1 = {
@@ -294,32 +296,23 @@ const DB1 = {
       });
     return returnStatment;
   }, */
+
+  
   fetchHives: async function () {
-    let returnStatment;
+    let returnStatment = [];
     const fbHives = fireDatabase.ref(database, "hives");
     onValue(fbHives, (snapshot) => {
       if (snapshot.exists()) {
-        const data = snapshot.val();
-        hives = [];
-        comments = [];
-        Object.keys(data).forEach((key) => {
-          comments = [];
-          if (data[key].details) {
-            Object.keys(data[key].details).forEach((comment) => {
-              comments.push(data[key].details[comment]);
-            });
-          }
-
-          var test = data[key]; // = comments
-          test.details = comments;
-          hives.push(test);
-        });
-        returnStatment = hives;
+        hives = snapshot.val();
+        for (const [key, value] of Object.entries(hives)) {
+          returnStatment.push(value);
+        }
+        return snapshot
       } else {
-        console.log("No data available");
+        console.log("No hive data available");
       }
     });
-    return returnStatment;
+    return hives;
   },
 
   getAllHives: async function () {
@@ -331,12 +324,13 @@ const DB1 = {
   },
 
   findOneHive: async function (fbid) {
-    let returnStatment = null;
-    hives.forEach((hive) => {
-      if (hive.fbid == fbid) {
-        returnStatment = hive;
+    let returnStatment;
+    for (const [key, value] of Object.entries(hives)) {
+      if (key == fbid) {
+        returnStatment=value;
       }
-    });
+      
+    }
     return returnStatment;
   },
 
@@ -421,39 +415,9 @@ const DB1 = {
     return returnStatment;
   },
 
-  addComment: async function (fbid, comment) {
-    let returnStatment = false;
-    await fireDatabase
-      .push(fireDatabase.ref(database, "hives/" + fbid + "/details/"), {
-        comments: comment,
-        dateLogged: Date().toString(),
-      })
-      .then((resp) => {
-        var newRefComment = resp.key;
-        fireDatabase.update(fireDatabase.ref(database, "hives/" + fbid + "/details/" + newRefComment), {
-          fbid: newRefComment,
-        });
-      })
-      .then(() => {
-        returnStatment = true;
-        //this.getHives();
-      });
-    return returnStatment;
-  },
 
-  deleteComment: async function (hiveID, commentID) {
-    let returnStatment = false;
-    await fireDatabase
-      .remove(fireDatabase.ref(database, "hives/" + hiveID + "/details/" + commentID))
-      .then((resp) => {
-        returnStatment = true;
-        //this.getHives();
-      })
-      .catch((error) => {
-        console.log("Error deleting comment ", commentID, " for hive: ", hiveID);
-      });
-    return returnStatment;
-  },
+
+ 
 
   updateLocation: async function (hiveID, update) {
     let returnStatment = false;
@@ -479,7 +443,7 @@ const DB1 = {
         alarms = snapshot.val();
         return snapshot;
       } else {
-        console.log("No data available");
+        console.log("No alarm data available");
       }
     });
     return alarms;
@@ -523,6 +487,83 @@ const DB1 = {
     }
     return returnStatment;
   },
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////COMMENTS///////////////////////////////////////////////////////////////////
+  fetchComments: async function () {
+    comments = []
+    const fbComments = fireDatabase.ref(database, "comments");
+    onValue(fbComments, (snapshot) => {
+      if (snapshot.exists()) {
+        comments = snapshot.val();
+        return snapshot;
+      } else {
+        console.log("No comment data available");
+      }
+    });
+    return comments;
+  },
+
+  createNewComment: async function (comment,fbid,userid) {
+    var newComment = Comment;
+    newComment.comment = comment
+    newComment.hiveid = fbid
+    newComment.userid = userid
+       let newRef;
+    await fireDatabase
+      .push(fireDatabase.ref(database, "comments/"), newComment)
+      .then((resp) => {
+        newRef = resp.key;
+      })
+      .then((resp) => {
+        fireDatabase.update(fireDatabase.ref(database, "comments/" + newRef), { fbid: newRef });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    //this.getHives();
+    return newComment;
+  },
+
+  getHiveComments: async function (fbid) {
+    let returnStatment = [];
+    for (const [key, value] of Object.entries(comments)) {
+      if (value.hiveid == fbid) {
+        returnStatment.push(value);
+      } else {
+        console.log("No comments found with hive id ", fbid);
+      }
+    }
+    return returnStatment;
+  },
+
+  getAllComments: async function () {
+    let returnStatment = [];
+    for (const [key, value] of Object.entries(comments)) {
+      returnStatment.push(value);
+    }
+    return returnStatment;
+  },
+
+  deleteComment: async function (commentID) {
+    let returnStatment = false;
+    await fireDatabase
+      .remove(fireDatabase.ref(database, "comments/" + commentID ))
+      .then((resp) => {
+        returnStatment = true;
+        this.fetchComments()
+      })
+      .catch((error) => {
+        console.log("Error deleting comment ", commentID);
+      });
+    return returnStatment;
+  },
+
+  
+
+
 };
 
 module.exports = DB1;
