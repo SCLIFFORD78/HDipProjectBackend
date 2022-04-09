@@ -278,6 +278,7 @@ const Users = {
             db1.fetchAlarms()
             db1.fetchHives()
             db1.fetchUsers()
+            db1.fetchComments()
             return retu
           }        
           
