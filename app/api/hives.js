@@ -167,7 +167,7 @@ const Hives = {
     handler: async function (request, h) {
       let returnStatment = { success: false };
       await db1
-        .addComment(request.payload._id, request.payload.comment)
+        .createNewComment(request.payload.comment, request.payload._id, request.payload.userid)
         .then((resp) => {
           if (resp) {
             returnStatment = { success: true };
@@ -184,6 +184,29 @@ const Hives = {
     },
   },
 
+  getHiveComments: {
+    auth: {
+      strategy: "jwt",
+    },
+    handler: async function (request, h) {
+      let returnStatment;
+      try {
+        await db1.getHiveComments(request.params.id).then((comments) => {
+          if (comments) {
+            returnStatment = comments;
+          } else {
+            returnStatment = Boom.notFound("No alarm data found");
+          }
+        });
+      } catch (error) {
+        console.log(error);
+        returnStatment = Boom.notFound("Error retriving hives data");
+      }
+
+      return returnStatment;
+    },
+  },
+
   deleteComment: {
     auth: {
       strategy: "jwt",
@@ -191,7 +214,7 @@ const Hives = {
     handler: async function (request, h) {
       let returnStatment = { success: false };
       await db1
-        .deleteComment(request.params.id, request.params.comment_id)
+        .deleteComment(request.params.comment_id)
         .then((resp) => {
           if (resp) {
             returnStatment = { success: true };
@@ -253,20 +276,23 @@ const Hives = {
       var combinedPointsTemperature = [];
       var combinedPointsHumidity = [];
       const hive = await db1.findOneHive(request.payload.fbid);
-      var values = JSON.parse("[" + hive.recordedData + "]");
-      values.forEach((element) => {
-        var theDate = new Date(element["timeStamp"] * 1000);
-        combinedPointsTemperature.push({
-          group: "Hive Temp",
-          date: theDate.toISOString(),
-          value: element["Temperature"],
+      if (hive.recordedData != "") {
+        var values = JSON.parse("[" + hive.recordedData + "]").sort((a,b)=>a["timeStamp"] - b["timsStamp"]);
+        values.forEach((element) => {
+          var theDate = new Date(element["timeStamp"] * 1000);
+          combinedPointsTemperature.push({
+            group: "Hive Temp",
+            date: theDate.toISOString(),
+            value: element["Temperature"],
+          });
+          combinedPointsHumidity.push({
+            group: "Hive Humidity",
+            date: theDate.toISOString(),
+            value: element["Humidity"],
+          });
         });
-        combinedPointsHumidity.push({
-          group: "Hive Humidity",
-          date: theDate.toISOString(),
-          value: element["Humidity"],
-        });
-      });
+      }
+
       const weather = await Weather.readWeatherHistory(hive.location.lat, hive.location.lng, hive.dateRegistered);
       if (weather.length > 0) {
         weather.forEach((element) => {
@@ -282,9 +308,9 @@ const Hives = {
             value: element["Humidity"],
           });
         });
-        return {combinedPointsTemperature:combinedPointsTemperature, combinedPointsHumidity:combinedPointsHumidity};
-      }else{
-        return {combinedPointsTemperature:combinedPointsTemperature, combinedPointsHumidity:combinedPointsHumidity};
+        return { combinedPointsTemperature: combinedPointsTemperature, combinedPointsHumidity: combinedPointsHumidity };
+      } else {
+        return { combinedPointsTemperature: combinedPointsTemperature, combinedPointsHumidity: combinedPointsHumidity };
       }
       return Boom.notFound("Error retrieving weather");
     },
@@ -316,7 +342,6 @@ const Hives = {
       return Boom.notFound("Error retrieving Images");
     },
   },
-
 
   getHiveAlarms: {
     auth: {

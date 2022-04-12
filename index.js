@@ -15,15 +15,6 @@ const DB1 = require("./app/models/db1.js");
 env.config();
 
 
-
-/* const server = Hapi.server({
-  port: process.env.PORT || 443,
-  tls: {
-    key: fs.readFileSync("keys/private/webserver.key"),
-    cert: fs.readFileSync("keys/webserver.crt"),
-  },
-});
- */
 const server2 = Hapi.server({
   port: process.env.PORT || 4001,
   routes: {
@@ -58,17 +49,7 @@ async function init() {
   await server2.register(require("hapi-auth-jwt2"));
   server2.validator(require("@hapi/joi"));
 
-  server2.views({
-    engines: {
-      hbs: require("handlebars"),
-    },
-    relativeTo: __dirname,
-    path: "./app/views",
-    layoutPath: "./app/views/layouts",
-    partialsPath: "./app/views/partials",
-    layout: true,
-    isCached: false,
-  });
+
 
 
 
@@ -99,6 +80,7 @@ async function init() {
   DB1.fetchHives()
   DB1.fetchAlarms()
   DB1.fetchUsers()
+  DB1.fetchComments()
 }
 
 process.on("unhandledRejection", (err) => {

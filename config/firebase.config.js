@@ -1,10 +1,15 @@
+const env = require("dotenv");
+env.config();
+
+
+
 module.exports ={
-    apiKey: "AIzaSyCY8VnDgpIM0CGKRy6ZSnPnbR_V3X77jMQ",
-    authDomain: "hdip-65317.firebaseapp.com",
-    databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com",
-    projectId: "hdip-65317",
-    storageBucket: "hdip-65317.appspot.com",
-    messagingSenderId: "662261644857",
-    appId: "1:662261644857:web:c0baafb4920393093497e8",
-    measurementId: "G-L966EHJ23D"
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.authDomain,
+    databaseURL: process.env.databaseURL,
+    projectId: process.env.projectId,
+    storageBucket: process.env.storageBucket,
+    messagingSenderId: process.env.messagingSenderId,
+    appId: process.env.appId,
+    measurementId: process.env.measurementId
 }
