@@ -277,7 +277,7 @@ const Hives = {
       var combinedPointsHumidity = [];
       const hive = await db1.findOneHive(request.payload.fbid);
       if (hive.recordedData != "") {
-        var values = JSON.parse("[" + hive.recordedData + "]");
+        var values = JSON.parse("[" + hive.recordedData + "]").sort((a,b)=>a["timeStamp"] - b["timsStamp"]);
         values.forEach((element) => {
           var theDate = new Date(element["timeStamp"] * 1000);
           combinedPointsTemperature.push({

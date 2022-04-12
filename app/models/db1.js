@@ -7,13 +7,15 @@ const User = require("./user");
 const Hive = require("./hive");
 const Alarm = require("./alarms");
 const Comment = require("./comments");
-const serviceAccount = require("../../config/hdip-65317-firebase-adminsdk-3auua-1d23de656e.json");
 const { authenticate } = require("../api/users");
 const { func } = require("@hapi/joi");
 const { child, onValue } = require("firebase/database");
 const { map } = require("lodash");
 const { details } = require("./hive");
 const { async } = require("@firebase/util");
+const env = require("dotenv");
+env.config()
+const firebaseAdmin = JSON.parse(process.env.firebaseAdmin)
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
@@ -22,7 +24,7 @@ const fireAuth = firebase.getAuth(app);
 const database = fireDatabase.getDatabase(app);
 var user = fireAuth.currentUser;
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(firebaseAdmin),
   databaseURL: "https://hdip-65317-default-rtdb.firebaseio.com",
 });
 var users = {};
@@ -511,6 +513,7 @@ const DB1 = {
     newComment.comment = comment
     newComment.hiveid = fbid
     newComment.userid = userid
+    newComment.dateLogged = Math.floor(Date.now() / 1000).toString()
        let newRef;
     await fireDatabase
       .push(fireDatabase.ref(database, "comments/"), newComment)
