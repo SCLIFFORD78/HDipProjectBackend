@@ -176,6 +176,44 @@ const DB1 = {
     return user;
   },
 
+  googleauthenticate: async function (googleID) {
+    await admin.auth() .verifyIdToken(googleID).then((decodedToken)=>{
+      const uid = decodedToken.uid;
+
+    })
+    await firebase
+      .signInWithEmailAndPassword(fireAuth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        if (!userCredential) {
+          throw Boom.notFound(`No tutorial available for slug`);
+        } else {
+          console.log("Successfully loggedin new user:", userCredential.user.uid);
+          user = userCredential.user;
+          fireDatabase.onValue(
+            fireDatabase.ref(database, "/users/"),
+            (snapshot) => {
+              //const username = (snapshot.val() && snapshot.val().username) || 'Anonymous';
+              // ...
+              users = snapshot.exportVal();
+              console.log(users);
+            },
+            {
+              onlyOnce: true,
+            }
+          );
+        }
+
+        // ...
+      })
+      .catch((error) => {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        console.log("Error loggedin new user:", errorMessage);
+      });
+    return user;
+  },
+
   logout: async function () {
     let returnStatment = false;
     await firebase

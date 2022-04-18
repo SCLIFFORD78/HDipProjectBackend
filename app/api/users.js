@@ -304,6 +304,44 @@ const Users = {
     },
   },
 
+  googleauthenticate: {
+    auth: false,
+
+    handler: async function (request, h) {
+      try {
+        let user
+        await db1.googleauthenticate(request.payload.googleID).then((usr) => {
+          if (!usr) {
+            return Boom.unauthorized("User not found"); 
+          }  else {
+            const token = utils.createToken(usr);
+            var retu =  h.response({ success: true, token: token }).code(201);
+            user = usr
+            db1.fetchAlarms()
+            db1.fetchHives()
+            db1.fetchUsers()
+            db1.fetchComments()
+            return retu
+          }        
+          
+        })
+        
+        if (typeof user !== 'undefined'){
+          const token = utils.createToken(user);
+          console.log(user)
+          var retu =  h.response({ success: true, token: token }).code(201);
+          return retu
+        }else{
+          return Boom.unauthorized("User not found"); 
+        }
+
+      } catch (err) {
+        console.log(err)
+        return Boom.notFound("internal db failure");
+      }
+    },
+  },
+
   toggleAdmin: {
     auth: {
       strategy: "jwt",
