@@ -34,6 +34,7 @@ module.exports = [
   
 
   { method: "POST", path: "/api/users/authenticate", config: Users.authenticate },
+  { method: "POST", path: "/api/users/googleauthenticate", config: Users.googleauthenticate },
 
   {
     method: "GET",
