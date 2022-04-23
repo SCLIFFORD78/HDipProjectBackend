@@ -388,13 +388,25 @@ const DB1 = {
 
   createNewHive: async function (hive) {
     var newHive = Hive;
-    hives.sort((a, b) => a.tag - b.tag);
     num = 1;
-    hives.forEach((hive) => {
-      if (hive.tag == num) {
-        num++;
+    var checked = false
+    //hives.sort((a, b) => a.tag - b.tag);
+    var hivesLength = 0
+    for (const [key, value] of Object.entries(hives)) {hivesLength++}
+    while (!checked) {
+      var runCount = 0
+      for (const [key, value] of Object.entries(hives)) {
+        if (value.tag == num){
+          num++
+          
+          break
+        }
+        runCount++
       }
-    });
+      if (runCount == hivesLength) {
+        checked = true
+      }
+    }
     newHive.description = hive.description;
     newHive.details = [];
     newHive.image = "";
